@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Ominix AI 🤖</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Ominix - Agentic AI Chatbot with memory, tools, and document search">
+    <meta name="theme-color" content="#0b0e14">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+<base target="_blank">
+</head>
+<body>
+    <!-- Sidebar Backdrop -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()" aria-hidden="true"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar" aria-label="Conversation history">
+        <div class="sidebar-header">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">O</div>
+                <div class="brand-info">
+                    <div class="brand-name">Ominix</div>
+                    <span class="brand-tag">AGENTIC AI</span>
+                </div>
+            </div>
+            <button class="new-chat" onclick="newChat()" aria-label="Start new conversation">
+                <span class="new-chat-icon">+</span>
+                <span>New chat</span>
+            </button>
+        </div>
+
+        <div class="history-section">
+            <div class="history-title">Recent Chats</div>
+            <div id="conversationList" class="conversation-list" role="list" aria-label="Recent conversations">
+                <div class="history-loading" id="historyLoading">
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line short"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light theme" title="Toggle theme">
+                <span id="themeIcon">🌙</span>
+            </button>
+            <div class="version-tag">v1.0</div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()" title="Menu" aria-label="Toggle sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="topbar-title" id="topbarTitle">Ominix Agentic AI</div>
+            </div>
+            <div class="topbar-right">
+                <div class="status" id="status" aria-live="polite">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span class="status-text" id="statusText">Ready</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Chat Area -->
+        <div class="chat-container" id="chatContainer">
+            <!-- Welcome Screen -->
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-content">
+                    <h1 class="welcome-title">
+                        <span class="gradient-text">How can I help you today?</span>
+                    </h1>
+                    <p class="welcome-subtitle">
+                        Ask questions, upload documents, use tools, search the web, and chat with persistent memory.
+                    </p>
+
+                    <div class="cards-grid" id="cardsGrid">
+                        <div class="card" onclick="usePrompt('Search the web for latest AI agent news and frameworks.')" tabindex="0" role="button">
+                            <div class="card-icon">🌐</div>
+                            <div class="card-text">Search latest web info</div>
+                            <div class="card-hint">Real-time news & updates</div>
+                        </div>
+
+                        <div class="card" onclick="usePrompt('Summarize the document I uploaded and extract key insights.')" tabindex="0" role="button">
+                            <div class="card-icon">📄</div>
+                            <div class="card-text">Summarize uploaded document</div>
+                            <div class="card-hint">PDF, DOCX, TXT support</div>
+                        </div>
+
+                        <div class="card" onclick="usePrompt('Remember that my channel name is dswithbappy.')" tabindex="0" role="button">
+                            <div class="card-icon">🧠</div>
+                            <div class="card-text">Save something to memory</div>
+                            <div class="card-hint">Persistent long-term recall</div>
+                        </div>
+
+                        <div class="card" onclick="usePrompt('Calculate 125 * 48 / 6 + sqrt(144)')" tabindex="0" role="button">
+                            <div class="card-icon">🧮</div>
+                            <div class="card-text">Use calculator tool</div>
+                            <div class="card-hint">Math & expressions</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Container -->
+            <div class="messages-area" id="messagesArea"></div>
+
+            <!-- Scroll to bottom button -->
+            <button class="scroll-bottom-btn" id="scrollBottomBtn" onclick="scrollToBottom()" aria-label="Scroll to bottom">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <div class="input-wrapper">
+                <!-- Hidden file input -->
+                <input type="file" id="fileInput" style="display: none;" 
+                    accept=".pdf,.docx,.txt,.md,.py,.csv" 
+                    onchange="uploadFile()" aria-label="Upload document">
+
+                <!-- Attach button -->
+                <button class="attach-btn" onclick="openFilePicker()" title="Upload document (PDF, DOCX, TXT, MD, PY, CSV)" aria-label="Upload document">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"></path>
+                    </svg>
+                </button>
+
+                <!-- Text input -->
+                <textarea id="messageInput" 
+                    placeholder="Ask anything..." 
+                    rows="1" 
+                    oninput="autoResize(this)"
+                    onkeydown="handleKeyDown(event)"
+                    aria-label="Message input"></textarea>
+
+                <!-- Mic button -->
+                <button class="mic-btn" id="micBtn" onclick="toggleDictation()" title="Dictate message" aria-label="Start dictation">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 01-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                </button>
+
+                <!-- Send button -->
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send message">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Upload progress -->
+            <div class="upload-progress" id="uploadProgress" style="display: none;">
+                <div class="upload-progress-bar">
+                    <div class="upload-progress-fill" id="uploadProgressFill"></div>
+                </div>
+                <div class="upload-progress-text" id="uploadProgressText">Uploading...</div>
+            </div>
+
+            <!-- Notice -->
+            <div class="notice" id="noticeText">
+                Ominix can make mistakes. Check important information.
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>
