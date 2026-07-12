@@ -11,7 +11,83 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="../static/style.css">
+    <style>
+        /* Model Selector Styles */
+        .model-selector {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 12px;
+        }
+        .model-select {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 6px 24px 6px 10px;
+            appearance: none;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .model-select:hover {
+            background: rgba(255,255,255,0.09);
+            border-color: rgba(255,255,255,0.12);
+        }
+        .model-select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+        }
+        .model-select option {
+            background: #0f1117;
+            color: #e2e8f0;
+            font-size: 13px;
+        }
+        .model-select option:disabled {
+            color: #475569;
+        }
+        .model-arrow {
+            position: absolute;
+            right: 8px;
+            pointer-events: none;
+            font-size: 10px;
+            color: #94a3b8;
+        }
+        .model-status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .model-status-dot.ready { background: #22c55e; box-shadow: 0 0 0 2px rgba(34,197,94,0.2); }
+        .model-status-dot.not-ready { background: #475569; }
+        .model-status-dot.pulling { background: #f59e0b; animation: pulse 1.5s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .local-badge {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 5px;
+            border-radius: 4px;
+            background: rgba(34,197,94,0.12);
+            color: #22c55e;
+            margin-left: 4px;
+        }
+        .local-badge.offline {
+            background: rgba(71,85,105,0.2);
+            color: #475569;
+        }
+    </style>
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -48,7 +124,7 @@
             <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light theme" title="Toggle theme">
                 <span id="themeIcon">🌙</span>
             </button>
-            <div class="version-tag">v1.0</div>
+            <div class="version-tag">v1.1</div>
         </div>
     </aside>
 
@@ -63,6 +139,17 @@
                 <div class="topbar-title" id="topbarTitle">Ominix Agentic AI</div>
             </div>
             <div class="topbar-right">
+                <!-- Model Selector -->
+                <div class="model-selector" id="modelSelector" title="Select AI model">
+                    <span class="model-status-dot ready" id="modelStatusDot"></span>
+                    <select class="model-select" id="modelSelect" onchange="onModelChange(this.value)">
+                        <option value="groq">⚡ Groq</option>
+                        <option value="gemini">🔵 Gemini</option>
+                        <option value="local">🖥️ Local <span class="local-badge" id="localBadge">Offline</span></option>
+                    </select>
+                    <span class="model-arrow">▼</span>
+                </div>
+
                 <div class="status" id="status" aria-live="polite">
                     <span class="status-dot" id="statusDot"></span>
                     <span class="status-text" id="statusText">Ready</span>
@@ -180,6 +267,92 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="/static/script.js"></script>
+    <script src="../static/script.js"></script>
+
+    <!-- Model Selector & Health Check Logic -->
+    <script>
+    (function() {
+        // ===== Model Selection =====
+        const modelSelect = document.getElementById('modelSelect');
+        const localBadge = document.getElementById('localBadge');
+        const modelStatusDot = document.getElementById('modelStatusDot');
+
+        // Restore saved model from localStorage
+        const savedModel = localStorage.getItem('ominix_selected_model');
+        if (savedModel && [...modelSelect.options].some(o => o.value === savedModel)) {
+            modelSelect.value = savedModel;
+        }
+
+        window.getSelectedModel = function() {
+            return modelSelect.value;
+        };
+
+        window.onModelChange = function(value) {
+            localStorage.setItem('ominix_selected_model', value);
+            updateModelStatusDot();
+        };
+
+        function updateModelStatusDot() {
+            const val = modelSelect.value;
+            if (val === 'local') {
+                const isReady = localStorage.getItem('ominix_local_ready') === 'true';
+                modelStatusDot.className = 'model-status-dot ' + (isReady ? 'ready' : 'not-ready');
+            } else {
+                modelStatusDot.className = 'model-status-dot ready';
+            }
+        }
+
+        // ===== Health Check =====
+        async function checkHealth() {
+            try {
+                const res = await fetch('/health');
+                if (!res.ok) return;
+                const data = await res.json();
+                const local = data.llm_tiers.local;
+
+                // Update local option
+                const localOption = modelSelect.querySelector('option[value="local"]');
+                if (local.ready && local.model_cached) {
+                    localOption.textContent = '🖥️ Local';
+                    localOption.disabled = false;
+                    localBadge.textContent = 'Ready';
+                    localBadge.className = 'local-badge';
+                    localStorage.setItem('ominix_local_ready', 'true');
+                } else if (local.ready && !local.model_cached) {
+                    localOption.textContent = '🖥️ Local (Downloading...)';
+                    localOption.disabled = false;
+                    localBadge.textContent = 'Downloading';
+                    localBadge.className = 'local-badge offline';
+                    localStorage.setItem('ominix_local_ready', 'false');
+                    modelStatusDot.className = 'model-status-dot pulling';
+                } else {
+                    localOption.textContent = '🖥️ Local (Offline)';
+                    localOption.disabled = true;
+                    localBadge.textContent = 'Offline';
+                    localBadge.className = 'local-badge offline';
+                    localStorage.setItem('ominix_local_ready', 'false');
+                }
+                updateModelStatusDot();
+            } catch (e) {
+                console.warn('Health check failed:', e);
+            }
+        }
+
+        // Check health on load and every 10 seconds
+        checkHealth();
+        setInterval(checkHealth, 10000);
+        updateModelStatusDot();
+        const origSendMessage = window.sendMessage;
+        if (typeof origSendMessage === 'function') {
+            window.sendMessage = function() {
+                window.__selectedModel = getSelectedModel();
+                return origSendMessage.apply(this, arguments);
+            };
+        }
+
+        // Expose for script.js to read if needed
+        window.__getSelectedModel = getSelectedModel;
+    })();
+    </script>
 </body>
 </html>

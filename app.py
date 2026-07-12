@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import os
 import re
 import uuid
 
@@ -18,7 +19,7 @@ from langchain_core.messages import HumanMessage, AIMessage, AIMessageChunk, Too
 
 from src.rag import add_document_to_rag
 from src.tool import set_current_thread_id
-from src.agent import get_agent
+from src.agent import get_agent, _local_manager
 from src.db import (
     init_db,
     save_chat_message,
@@ -36,9 +37,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-
 # App Setup
-app = FastAPI(title="AnkitGPT", version="1.0.0")
+app = FastAPI(title="AnkitGPT", version="1.1.0")
 
 # CORS — allow frontend on any local port during development
 app.add_middleware(
@@ -61,6 +61,21 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Init DB
 init_db()
 
+
+# ==================== STARTUP: Background pull local model ====================
+@app.on_event("startup")
+async def startup_pull_local_model():
+    """
+    Background-pull the local Ollama model on startup so the first
+    fallback chat does not block for 2-10 minutes.
+    """
+    if _local_manager.is_server_running() and not _local_manager.is_model_available():
+        logger.info("🔧 Local LLM not cached. Starting background pull...")
+        asyncio.create_task(asyncio.to_thread(_local_manager.pull_model))
+    elif _local_manager.is_model_available():
+        logger.info("✅ Local LLM already cached and ready.")
+    else:
+        logger.info("⚠️  Ollama server not detected. Local fallback will be unavailable until Ollama is started.")
 
 
 # Constants
@@ -87,19 +102,10 @@ def _sanitize_filename(filename: str) -> str:
     if not filename:
         raise ValueError("No filename provided")
 
-    # Strip directory components
     basename = Path(filename).name
-
-    # Remove null bytes
     basename = basename.replace("\x00", "")
-
-    # Remove control characters
     basename = re.sub(r"[\x00-\x1f\x7f]", "", basename)
-
-    # Replace path separators just in case
     basename = basename.replace("/", "_").replace("\\", "_")
-
-    # Collapse whitespace
     basename = " ".join(basename.split())
 
     if not basename or basename in {".", "..", ""}:
@@ -168,10 +174,33 @@ def extract_text_from_chunk(chunk) -> str:
     return ""
 
 
-# Routes
+# ==================== ROUTES ====================
+
 @app.get("/")
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/health")
+async def health():
+    """
+    Health check that reports which LLM tiers are ready.
+    Useful for frontend model selector and diagnostics.
+    """
+    return {
+        "status": "ok",
+        "version": "1.1.0",
+        "llm_tiers": {
+            "groq": {"ready": True, "note": "Cloud API"},
+            "gemini": {"ready": True, "note": "Cloud API"},
+            "local": {
+                "ready": _local_manager.is_server_running(),
+                "model_cached": _local_manager.is_model_available(),
+                "model_name": os.getenv("LOCAL_MODEL_NAME", "llama3.1:8b"),
+                "host": os.getenv("OLLAMA_HOST", "http://localhost:11434"),
+            },
+        },
+    }
 
 
 @app.get("/conversations")
@@ -230,7 +259,6 @@ async def upload_document(
     except ValueError as e:
         return JSONResponse({"success": False, "message": str(e)}, status_code=400)
 
-    # Validate filename
     try:
         filename = _sanitize_filename(file.filename or "uploaded_file")
     except ValueError as e:
@@ -252,7 +280,6 @@ async def upload_document(
             status_code=400,
         )
 
-    # Read file with size limit
     try:
         contents = await file.read()
     except Exception as e:
@@ -274,7 +301,6 @@ async def upload_document(
             status_code=413,
         )
 
-    # Save to disk
     file_id = str(uuid.uuid4())
     safe_filename = filename.replace(" ", "_")
     file_path = Path("uploads") / f"{file_id}_{safe_filename}"
@@ -288,13 +314,11 @@ async def upload_document(
             status_code=500,
         )
 
-    # Ingest into RAG
     try:
         await asyncio.to_thread(create_or_update_conversation, thread_id, "uploaded document")
         result = await asyncio.to_thread(add_document_to_rag, file_path=str(file_path), thread_id=thread_id)
     except Exception as e:
         logger.exception("RAG ingestion failed")
-        # Clean up the file on failure
         try:
             file_path.unlink(missing_ok=True)
         except Exception:
@@ -334,10 +358,8 @@ async def chat_stream(request: Request):
     except ValueError as e:
         return JSONResponse({"error": str(e)}, status_code=400)
 
-    # Set thread context for RAG/memory tools (contextvars-safe)
     set_current_thread_id(thread_id)
 
-    # Pre-stream DB work (non-blocking)
     try:
         await asyncio.to_thread(create_or_update_conversation, thread_id, user_message)
         await asyncio.to_thread(save_chat_message, thread_id, "user", user_message)
@@ -354,12 +376,10 @@ async def chat_stream(request: Request):
     config = {"configurable": {"thread_id": thread_id}}
 
     async def event_generator():
-        """Async generator that runs the sync LangGraph stream in a thread pool."""
         final_answer = ""
         queue: asyncio.Queue = asyncio.Queue()
 
         def _sync_stream():
-            """Blocking LangGraph stream — runs in thread pool."""
             nonlocal final_answer
             try:
                 inputs = {
@@ -381,7 +401,6 @@ async def chat_stream(request: Request):
                 queue.put_nowait(("error", str(e)))
                 queue.put_nowait(("done", ""))
 
-        # Launch sync stream in background thread
         loop = asyncio.get_event_loop()
         stream_task = loop.run_in_executor(None, _sync_stream)
 
@@ -391,7 +410,20 @@ async def chat_stream(request: Request):
                 if msg_type == "token":
                     yield _sse_data({"token": data})
                 elif msg_type == "error":
-                    yield _sse_data({"error": data})
+                    err_msg = str(data)
+                    if "All LLM tiers failed" in err_msg or "Local LLM failed" in err_msg:
+                        yield _sse_data({
+                            "error": (
+                                "All AI models are currently unavailable.\n\n"
+                                "Please check:\n"
+                                "1. Your internet connection (for Groq/Gemini)\n"
+                                "2. Ollama is installed and running (for local mode):\n"
+                                "   https://ollama.com/download\n\n"
+                                f"Technical: {err_msg}"
+                            )
+                        })
+                    else:
+                        yield _sse_data({"error": err_msg})
                     yield _sse_data({"done": True})
                     break
                 elif msg_type == "done":
@@ -405,7 +437,6 @@ async def chat_stream(request: Request):
                     yield _sse_data({"done": True})
                     break
         finally:
-            # Ensure the background task completes even if client disconnects
             if not stream_task.done():
                 stream_task.cancel()
             try:
