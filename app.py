@@ -1,7 +1,6 @@
 import asyncio
 import json
 import logging
-import os
 import re
 import uuid
 
@@ -19,7 +18,7 @@ from langchain_core.messages import HumanMessage, AIMessage, AIMessageChunk, Too
 
 from src.rag import add_document_to_rag
 from src.tool import set_current_thread_id
-from src.agent import get_agent, _local_manager
+from src.agent import get_agent
 from src.db import (
     init_db,
     save_chat_message,
@@ -60,22 +59,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Init DB
 init_db()
-
-
-# ==================== STARTUP: Background pull local model ====================
-@app.on_event("startup")
-async def startup_pull_local_model():
-    """
-    Background-pull the local Ollama model on startup so the first
-    fallback chat does not block for 2-10 minutes.
-    """
-    if _local_manager.is_server_running() and not _local_manager.is_model_available():
-        logger.info("🔧 Local LLM not cached. Starting background pull...")
-        asyncio.create_task(asyncio.to_thread(_local_manager.pull_model))
-    elif _local_manager.is_model_available():
-        logger.info("✅ Local LLM already cached and ready.")
-    else:
-        logger.info("⚠️  Ollama server not detected. Local fallback will be unavailable until Ollama is started.")
 
 
 # Constants
@@ -193,12 +176,6 @@ async def health():
         "llm_tiers": {
             "groq": {"ready": True, "note": "Cloud API"},
             "gemini": {"ready": True, "note": "Cloud API"},
-            "local": {
-                "ready": _local_manager.is_server_running(),
-                "model_cached": _local_manager.is_model_available(),
-                "model_name": os.getenv("LOCAL_MODEL_NAME", "llama3.1:8b"),
-                "host": os.getenv("OLLAMA_HOST", "http://localhost:11434"),
-            },
         },
     }
 
@@ -358,8 +335,6 @@ async def chat_stream(request: Request):
     except ValueError as e:
         return JSONResponse({"error": str(e)}, status_code=400)
 
-    set_current_thread_id(thread_id)
-
     try:
         await asyncio.to_thread(create_or_update_conversation, thread_id, user_message)
         await asyncio.to_thread(save_chat_message, thread_id, "user", user_message)
@@ -379,9 +354,24 @@ async def chat_stream(request: Request):
         final_answer = ""
         queue: asyncio.Queue = asyncio.Queue()
 
+        # asyncio.Queue is NOT thread-safe. _sync_stream below runs in a
+        # worker thread via run_in_executor, so all writes from that thread
+        # must be marshalled back onto the event loop.
+        loop = asyncio.get_running_loop()
+
+        def _put(item):
+            loop.call_soon_threadsafe(queue.put_nowait, item)
+
         def _sync_stream():
             nonlocal final_answer
             try:
+                # BUG FIX: loop.run_in_executor spawns a real OS thread and
+                # does NOT copy the caller's contextvars.Context into it
+                # (unlike asyncio.to_thread, which does). set_current_thread_id
+                # must be called here, inside the worker thread, or every
+                # tool call in the graph (RAG search, memory) silently falls
+                # back to the default thread_id instead of the real one.
+                set_current_thread_id(thread_id)
                 inputs = {
                     "messages": [HumanMessage(content=user_message)],
                     "model_name": selected_model,
@@ -394,14 +384,13 @@ async def chat_stream(request: Request):
                     token = extract_text_from_chunk(chunk)
                     if token:
                         final_answer += token
-                        queue.put_nowait(("token", token))
-                queue.put_nowait(("done", final_answer))
+                        _put(("token", token))
+                _put(("done", final_answer))
             except Exception as e:
                 logger.exception("Error during agent stream")
-                queue.put_nowait(("error", str(e)))
-                queue.put_nowait(("done", ""))
+                _put(("error", str(e)))
+                _put(("done", ""))
 
-        loop = asyncio.get_event_loop()
         stream_task = loop.run_in_executor(None, _sync_stream)
 
         try:
@@ -411,14 +400,12 @@ async def chat_stream(request: Request):
                     yield _sse_data({"token": data})
                 elif msg_type == "error":
                     err_msg = str(data)
-                    if "All LLM tiers failed" in err_msg or "Local LLM failed" in err_msg:
+                    if "All LLM tiers failed" in err_msg:
                         yield _sse_data({
                             "error": (
                                 "All AI models are currently unavailable.\n\n"
-                                "Please check:\n"
-                                "1. Your internet connection (for Groq/Gemini)\n"
-                                "2. Ollama is installed and running (for local mode):\n"
-                                "   https://ollama.com/download\n\n"
+                                "Please check your internet connection and "
+                                "Groq/Gemini API keys.\n\n"
                                 f"Technical: {err_msg}"
                             )
                         })

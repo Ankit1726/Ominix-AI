@@ -11,6 +11,7 @@ from src.db import save_memory, search_memory
 from src.rag import retrieve_from_rag
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 _MATH_FUNCTIONS = {
@@ -142,7 +143,6 @@ def calculator(expression: str) -> str:
         return f"Calculation error: {e}"
 
 
-
 # Stock Price Tool
 @tool
 def get_stock_price(symbol: str) -> str:
@@ -154,8 +154,7 @@ def get_stock_price(symbol: str) -> str:
         symbol = symbol.strip().upper()
         if not symbol:
             return "Error: Stock symbol cannot be empty"
-
-        api_key = os.getenv("ALPHA_VINTAGE_API_KEY")
+        api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
         if not api_key:
             return "Error: ALPHA_VANTAGE_API_KEY environment variable is not set"
 
@@ -300,7 +299,6 @@ def get_current_weather(location: str) -> str:
         return f"Unexpected weather API response: {error}"
 
 
-# Thread Context (contextvars — thread-safe)
 _current_thread_id = contextvars.ContextVar("current_thread_id", default="default")
 
 
@@ -336,6 +334,7 @@ def search_uploaded_documents(query: str) -> str:
         )
     except Exception as e:
         return f"Document search error: {e}"
+
 
 # Long-Term Memory
 @tool

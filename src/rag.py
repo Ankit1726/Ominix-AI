@@ -7,7 +7,6 @@ from typing import List, Optional
 from pypdf import PdfReader
 
 from langchain_core.documents import Document
-from langchain_core.tools import tool
 from langchain_chroma import Chroma
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -23,7 +22,6 @@ ALLOWED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".py", ".csv"}
 
 UPLOAD_DIR.mkdir(exist_ok=True)
 DB_DIR.mkdir(exist_ok=True)
-
 
 
 # Embeddings (lazy init to avoid import-time crash)
@@ -56,7 +54,6 @@ def _get_vectorstore() -> Chroma:
             persist_directory=str(DB_DIR),
         )
     return _vectorstore
-
 
 
 # File Reading (with path traversal protection)
@@ -159,12 +156,21 @@ def read_file_text(file_path: str) -> str:
     raise ValueError(f"Unsupported file type: {suffix}")
 
 
-
 # Chunking & Embedding
-def _generate_chunk_id(file_path: str, thread_id: str, chunk_index: int) -> str:
-    """Generate a deterministic ID for a chunk to enable deduplication."""
-    content = f"{thread_id}:{file_path}:{chunk_index}"
-    return hashlib.sha256(content.encode("utf-8")).hexdigest()[:32]
+def _generate_chunk_id(thread_id: str, chunk_text: str) -> str:
+    """
+    Generate a deterministic ID for a chunk based on its actual content
+    (scoped per thread) so identical content is deduplicated correctly
+    even if it arrives via a different file path or a shifted chunk index.
+
+    NOTE: previously this hashed (thread_id, file_path, chunk_index) —
+    a position-based key that could silently skip re-ingesting changed
+    content (if index/path happened to match) or fail to dedupe identical
+    content arriving under a different path. Content-based hashing fixes
+    both.
+    """
+    content = f"{thread_id}:{chunk_text}"
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
 def add_document_to_rag(file_path: str, thread_id: str) -> dict:
@@ -204,7 +210,7 @@ def add_document_to_rag(file_path: str, thread_id: str) -> dict:
     ids: List[str] = []
 
     for i, chunk in enumerate(chunks):
-        chunk_id = _generate_chunk_id(file_path, thread_id, i)
+        chunk_id = _generate_chunk_id(thread_id, chunk)
         docs.append(
             Document(
                 page_content=chunk,
@@ -234,7 +240,6 @@ def add_document_to_rag(file_path: str, thread_id: str) -> dict:
         "new_chunks": len(new_docs),
         "skipped_duplicates": len(docs) - len(new_docs),
     }
-
 
 
 # Retrieval
@@ -282,19 +287,3 @@ def retrieve_from_rag(
         )
 
     return "\n\n".join(results)
-
-
-# LangChain Tool
-@tool
-def rag_tool(query: str, thread_id: str) -> str:
-    """
-    Search previously uploaded documents using semantic search.
-
-    Args:
-        query: User question.
-        thread_id: Current conversation thread.
-
-    Returns:
-        Top matching document chunks.
-    """
-    return retrieve_from_rag(query=query, thread_id=thread_id, k=5)

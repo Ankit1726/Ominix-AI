@@ -450,6 +450,80 @@ body {
   text-overflow: ellipsis;
 }
 
+/* ── Model Selector (topbar) ──
+   NOTE: previously this was defined TWICE in this file with conflicting
+   values (once under "Model Select" for a legacy input-area dropdown that
+   no longer exists in the markup, and again at the very bottom as a
+   hardcoded, non-themed copy of the inline <style> block from index.html).
+   Consolidated into a single, theme-variable-driven definition here. */
+.model-selector {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 12px;
+}
+
+.model-select {
+  height: 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 6px 24px 6px 10px;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.model-select:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+}
+
+.model-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.model-select option {
+  background: var(--surface-alt);
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.model-select option:disabled {
+  color: var(--text-muted);
+}
+
+.model-arrow {
+  position: absolute;
+  right: 8px;
+  pointer-events: none;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.model-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.model-status-dot.ready {
+  background: var(--success);
+  box-shadow: 0 0 0 2px var(--success-soft);
+}
+
+.model-status-dot.not-ready {
+  background: var(--text-faint);
+}
+
 /* ── Status ── */
 .status {
   font-family: var(--font-mono);
@@ -999,46 +1073,6 @@ textarea {
 
 textarea::placeholder {
   color: var(--text-faint);
-}
-
-/* ── Model Select ── */
-.model-select {
-  height: 38px;
-  max-width: 140px;
-  background: var(--surface-alt);
-  color: var(--text-dim);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 0 8px;
-  margin: 0 6px;
-  outline: none;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: all var(--transition-fast);
-}
-
-.model-select:hover {
-  border-color: var(--text-faint);
-  color: var(--text);
-}
-
-.model-select:focus {
-  border-color: var(--accent);
-}
-
-.model-select option,
-.model-select optgroup {
-  background: var(--surface-alt);
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-style: normal;
-}
-
-.model-select optgroup {
-  color: var(--text-dim);
-  font-size: 0.7rem;
 }
 
 /* ── Send Button ── */
