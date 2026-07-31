@@ -1,50 +1,20 @@
-# FastAPI
-fastapi==0.115.12
-uvicorn[standard]==0.34.3
+fastapi==0.136.3
+uvicorn==0.48.0
 jinja2==3.1.6
-python-dotenv==1.1.1
-python-multipart==0.0.20
+python-multipart==0.0.29
+python-dotenv==1.2.2
 
-# LangChain
-langchain==0.3.27
-langchain-core==0.3.75
-langchain-community==0.3.27
-langchain-text-splitters==0.3.9
+langchain==1.3.2
+langchain-google-genai==4.2.4
+langchain-core==1.4.0
+langgraph==1.2.2
+langchain-text-splitters==1.1.2
+langgraph-checkpoint-sqlite==3.1.0
 
-# Gemini
-langchain-google-genai==2.1.10
-
-# Groq
-langchain-groq==0.3.7
-groq==0.31.0
-
-# LangGraph
-langgraph==0.6.7
-langgraph-checkpoint==2.1.1
-langgraph-checkpoint-sqlite==2.0.11
-
-# Vector Store
-chromadb==1.0.15
-langchain-chroma==0.2.5
-
-# Search
-langchain-tavily==0.2.11
-tavily-python==0.7.11
-duckduckgo-search==8.1.1
-
-# Documents
-pypdf==5.9.0
+langchain-chroma==1.1.0
+chromadb==1.5.9
+pypdf==6.12.2
 docx2txt==0.9
-
-# Database
-sqlalchemy==2.0.43
-
-# Utilities
-requests==2.32.4
-httpx==0.28.1
-aiofiles==24.1.0
-typing-extensions==4.14.1
-orjson==3.11.1
-pydantic==2.11.7
-tiktoken==0.11.0
-langsmith==0.4.14
+langchain-tavily==0.2.18
+tavily-python==0.7.24
+sqlalchemy==2.0.50
