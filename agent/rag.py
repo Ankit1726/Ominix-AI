@@ -1,4 +1,4 @@
-import os, docx2txt
+import docx2txt
 from pathlib import Path
 from typing import List
 from langchain_chroma import Chroma
@@ -8,7 +8,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 
 from dotenv import load_dotenv
-
 load_dotenv()
 
 UPLOAD_DIR = Path("data/uploads")

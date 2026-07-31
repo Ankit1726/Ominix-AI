@@ -1,4 +1,4 @@
-from backend.schema import (
+from agent.schema import (
     init_db,
     Conversation,
     ChatMessage,
