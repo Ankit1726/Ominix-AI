@@ -15,8 +15,7 @@
         rel="stylesheet">
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-    <link rel="stylesheet" href="../static/style.css">
-    <base target="_blank">
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
 </head>
 
 <body>
@@ -48,14 +47,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="sidebar-footer">
-            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light theme"
-                title="Toggle theme">
-                <span id="themeIcon">🌙</span>
-            </button>
-            <div class="version-tag">v1.1</div>
-        </div>
     </aside>
 
     <!-- Main Content -->
@@ -70,12 +61,22 @@
                 <div class="topbar-title" id="topbarTitle">Ominix Agentic AI</div>
             </div>
             <div class="topbar-right">
-                <!-- Model Selector: Groq / Gemini only, local option removed -->
+                <!-- Model Selector -->
                 <div class="model-selector" id="modelSelector" title="Select AI model">
                     <span class="model-status-dot ready" id="modelStatusDot"></span>
                     <select class="model-select" id="modelSelect" onchange="onModelChange(this.value)">
-                        <option value="groq">⚡ Groq</option>
-                        <option value="gemini">🔵 Gemini</option>
+                        <optgroup label="Mistral">
+                            <option value="ministral-8b-latest">🌬️ Ministral 8B</option>
+                            <option value="ministral-3b-latest">🌬️ Ministral 3B</option>
+                            <option value="mistral-medium-latest">🌬️ mistral-medium-latest</option>
+                        </optgroup>
+                        <optgroup label="Groq">
+                            <option value="llama-3.3-70b-versatile"> Llama 3.3 70B</option>
+                            <option value="llama-3.1-8b-instant"> Llama 3.1 8B Instant</option>
+                            <option value="qwen/qwen3-32b"> Qwen3 32B</option>
+                            <option value="deepseek-r1-distill-llama-70b"> DeepSeek R1 Distill 70B</option>
+                        </optgroup>
+
                     </select>
                     <span class="model-arrow">▼</span>
                 </div>
@@ -93,7 +94,7 @@
             <div class="welcome-screen" id="welcomeScreen">
                 <div class="welcome-content">
                     <h1 class="welcome-title">
-                        <span class="gradient-text">How can I help you today?</span>
+                        <span class="gradient-text">How can I help you today..✨</span>
                     </h1>
                     <p class="welcome-subtitle">
                         Ask questions, upload documents, use tools, search the web, and chat with persistent memory.
@@ -115,7 +116,7 @@
                             <div class="card-hint">PDF, DOCX, TXT support</div>
                         </div>
 
-                        <div class="card" onclick="usePrompt('Remember that my channel name is dswithbappy.')"
+                        <div class="card" onclick="usePrompt('Remember that my name is Ankit Gupta✨.')"
                             tabindex="0" role="button">
                             <div class="card-icon">🧠</div>
                             <div class="card-text">Save something to memory</div>
@@ -200,13 +201,16 @@
             <!-- Notice -->
             <div class="notice" id="noticeText">
                 Ominix can make mistakes. Check important information.
+                <br>
+                Made with <span class="footer-heart" aria-hidden="true">❤️</span> by <span class="footer-name">Ankit
+                    Gupta</span>
             </div>
         </div>
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="../static/script.js"></script>
+    <script src="{{ url_for('static', path='script.js') }}"></script>
 
 </body>
 

@@ -1,6 +1,7 @@
 import os, sqlite3
 from pathlib import Path
 from langchain_groq import ChatGroq
+from langchain_mistralai import ChatMistralAI
 from langchain_core.messages import SystemMessage
 from langgraph.graph import StateGraph, START, MessagesState
 from langgraph.prebuilt import ToolNode, tools_condition
@@ -9,19 +10,25 @@ from agent.tools import tools
 from agent.prompt import SYSTEM_PROMPT as prompt
 
 from dotenv import load_dotenv
-
 load_dotenv()
 
 Path("data").mkdir(exist_ok=True)
-DEFAULT_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
+DEFAULT_MODEL = os.getenv("MISTRAL_MODEL", "mistral-medium-latest")
 
-ALLOWED_MODELS = {
+MISTRAL_MODELS = {
+    "ministral-3b-latest",
+    "ministral-8b-latest",
+    "mistral-medium-latest"
+}
+
+GROQ_MODELS = {
     "llama-3.1-8b-instant",
     "qwen/qwen3-32b",
-    "openai/gpt-oss-20b",
     "llama-3.3-70b-versatile",
     "deepseek-r1-distill-llama-70b",
 }
+
+ALLOWED_MODELS = GROQ_MODELS | MISTRAL_MODELS
 
 
 def normalize_model_name(model_name: str | None) -> str:
@@ -43,13 +50,16 @@ def normalize_model_name(model_name: str | None) -> str:
 
 def build_agent(model_name: str):
     """
-    Build one LangGraph agent for a selected Gemini model.
+    Build one LangGraph agent for a selected model.
+    Routes to ChatGroq or ChatMistralAI depending on which model was picked.
     """
 
     selected_model = normalize_model_name(model_name)
 
-    # Initialize Groq Model
-    llm = ChatGroq(model=selected_model, temperature=0.3, streaming=True)
+    if selected_model in MISTRAL_MODELS:
+        llm = ChatMistralAI(model=selected_model, temperature=0.3, streaming=True)
+    else:
+        llm = ChatGroq(model=selected_model, temperature=0.3, streaming=True)
 
     llm_with_tools = llm.bind_tools(tools)
 

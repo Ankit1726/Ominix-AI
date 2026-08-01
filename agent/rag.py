@@ -10,7 +10,7 @@ from pypdf import PdfReader
 from dotenv import load_dotenv
 load_dotenv()
 
-UPLOAD_DIR = Path("data/uploads")
+UPLOAD_DIR = Path("uploads")
 CHROMA_DIR = Path("data/chroma_db")
 
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
