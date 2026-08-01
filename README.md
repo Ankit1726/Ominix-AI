@@ -88,7 +88,7 @@
 - Long-term user memory
 - Personalized AI conversations
 
-### 🛠 Built-in AI Tools
+### ***🛠 Built-in AI Tools***
 
 - Calculator
 - Web Search
@@ -126,10 +126,10 @@
 -  ***LLM: Groq LLM | MistralAI | Gemini***
 -  ***Backend: Python 3.11***
 -  ***Frontend: HTML | CSS | JavaScript***
--  ***Deployment: Render % Docker***
+-  ***Deployment: Render & Docker***
 --- 
 
-### AI Services
+### ***AI Services***
 - Tavily Search
 - Persistent Memory
 - Calculator Tool
