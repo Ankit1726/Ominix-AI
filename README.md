@@ -15,7 +15,7 @@
 <img src="https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python"/>
 <img src="https://img.shields.io/badge/LangGraph-Agentic_AI-orange?style=for-the-badge"/>
 <img src="https://img.shields.io/badge/LangChain-Framework-blueviolet?style=for-the-badge"/>
-<img src="https://img.shields.io/badge/Groq-LLM-purple?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Mistral-LLM-purple?style=for-the-badge"/>
 <img src="https://img.shields.io/badge/Open_Source-❤-red?style=for-the-badge"/>
 
 </p>
