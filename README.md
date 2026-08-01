@@ -123,7 +123,7 @@
 
 ### ***🛠 Tech Stack***
 -  ***Framework & AI: LangGraph | LangChain***
--  ***LLM: Groq LLM | MistralAI | Gemini***
+-  ***LLM: GroqLLM | MistralAI | Gemini***
 -  ***Backend: Python 3.11***
 -  ***Frontend: HTML | CSS | JavaScript***
 -  ***Deployment: Render & Docker***
