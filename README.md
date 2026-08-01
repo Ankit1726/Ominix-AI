@@ -1,135 +1,232 @@
 <div align="center">
 
-#  ***Ominix AI ✨***
+# ***Ominix AI ✨***
 
-### ***Intelligent Agentic AI Assistant powered by LangGraph, Groq & Streamlit***
+#### ***🤖 Intelligent Agentic AI Assistant powered by LangGraph***
 
-
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
-[![LangGraph](https://img.shields.io/badge/LangGraph-Agentic_AI-orange)]()
-[![Streamlit](https://img.shields.io/badge/Streamlit-Web_App-red)]()
-[![License](https://img.shields.io/badge/License-MIT-green.svg)]()
-
---- 
-
-### ***📸 Preview***
+***Chat • Web Search • Document Intelligence • Persistent Memory • AI Tools***
 
 <p align="center">
-  <img src="./preview/ui.png" width="100%">
+<img src="https://readme-typing-svg.herokuapp.com?font=Poppins&weight=600&size=24&duration=3500&pause=1000&color=4DA6FF&center=true&vCenter=true&width=900&lines=Intelligent+Agentic+AI+Assistant;Chat+%7C+Web+Search+%7C+Memory;Document+Understanding+with+AI;Built+with+LangGraph+%2B+Groq+%2B+Streamlit;Built+by+Ankit+Gupta"/>
 </p>
+
+<p align="center">
+
+<img src="https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python"/>
+<img src="https://img.shields.io/badge/LangGraph-Agentic_AI-orange?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/LangChain-Framework-blueviolet?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Groq-LLM-purple?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Streamlit-Web_App-red?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Open_Source-❤-red?style=for-the-badge"/>
+
+</p>
+
+<p align="center">
+
+<a href="https://ominix-ai.onrender.com/" target="_blank">
+<img src="https://img.shields.io/badge/🚀%20Live%20Demo-Visit%20Now-success?style=for-the-badge">
+</a>
+
+</p>
+
 </div>
 
---- 
+---
 
-> 🌐 **Live Demo:** [Ominix-AI](https://ominix-ai.onrender.com)
+### ***🌟 About Ominix AI***
+
+- *****Ominix AI** is a modern **Agentic AI Assistant** built using **LangGraph**, **LangChain**, **Groq LLMs**, and **Streamlit**.***
+
+- ***Instead of using multiple AI applications for chatting, searching, summarizing documents, remembering information, and using utilities, Ominix AI combines everything into one intelligent workspace.***
+
+- The AI intelligently performs tasks such as:
+   - Natural AI Conversations
+   - Real-Time Web Search
+   - Document Summarization
+   - Persistent Long-Term Memory
+   - Built-in AI Tools
+   - Multi-LLM Support
 
 ---
 
-### ***📖 About***
+### ***Live Demo***
 
-- **Ominix AI** is a modern **Agentic AI Assistant** that combines conversational AI, web search, document understanding, persistent memory, and intelligent tools into one unified workspace.
-
-- Designed using **LangGraph**, **LangChain**, **Groq LLMs**, and **Streamlit**, it delivers fast, context-aware, and interactive AI experiences through a clean and responsive interface.
+> 🌐 ***Web Application: [Ominix-AI](https://ominix-ai.onrender.com)*** 
 
 ---
 
-###  ***Features*** 
+### ***📸 Project Preview***
+<p align="center">
+<img src="./preview/ui.png" width="100%">
+</p>
 
-#### 🤖 AI Chat
+---
+
+###  ***Features ✨***
+
+### 🤖 Intelligent AI Chat
 - Multi-turn conversations
 - Streaming AI responses
-- Context-aware conversations
+- Context-aware interactions
 - Multiple LLM support
+- Fast inference using Groq
 
-#### 🌐 Web Search
-- Search latest information
-- Real-time news
-- Source-based answers
+### 🌐 Real-Time Web Search
+- Latest news
+- Current events
+- Source-based responses
+- Internet search integration
 
-#### 📄 Document Intelligence
+### 📄 Document Intelligence
 - Upload PDF
 - Upload DOCX
 - Upload TXT
 - AI-powered summarization
-- Ask questions from uploaded documents
+- Ask questions from uploaded files
 
-#### 🧠 Persistent Memory
-- Save important information
-- Long-term memory
-- Personalized conversations
+### 🧠 Persistent Memory
+- Store important information
+- Long-term user memory
+- Personalized AI conversations
 
-#### 🧮 Built-in AI Tools
+### 🛠 Built-in AI Tools
 
 - Calculator
 - Web Search
 - Memory Tool
-- Document Tool
-
-#### 💻 Modern UI
-
-- Beautiful Dark Theme
-- Responsive Layout
-- Chat History
-- Modern Dashboard
-- Clean User Experience
-
----
-
-### 🏗️ Tech Stack
-- ***Frontend: HTML | CSS | JavaScript*** 
-- ***Backend: Python | LangChain | LanGraph***
-- ***LLM: Groq | Mistralai | Geimini***
-- ***Deployment: Render & Docker***
-
-### AI Tools
-- Tavily Search
-- Calculator Tool
-- Persistent Memory
 - Document Processing
 
 ---
 
-###  ***Use Cases 🎯***
-- AI Assistant
-- Research Assistant
-- Document Summarizer
-- Web Search Assistant
-- Personal Knowledge Assistant
-- Productivity Workspace
+### ***🧠 Agent Workflow***
+
+```text
+                   User Query
+                       │
+                       ▼
+              LangGraph Agent
+                       │
+        ┌──────────────┼──────────────┐
+        ▼              ▼              ▼
+   Web Search      Document AI      Memory
+        │              │              │
+        └──────────────┼──────────────┘
+                       ▼
+               Tool Execution
+                       │
+                       ▼
+                LLM Reasoning
+                       │
+                       ▼
+               Final AI Response
+```
+---
+
+### ***🛠 Tech Stack***
+-  ***Framework & AI: LangGraph | LangChain***
+-  ***LLM: Groq LLM | MistralAI | Gemini***
+-  ***Backend: Python 3.11***
+-  ***Frontend: HTML | CSS | JavaScript***
+-  ***Deployment: Render % Docker***
+--- 
+
+### AI Services
+- Tavily Search
+- Persistent Memory
+- Calculator Tool
+- Document Processing
 
 ---
+
+### ***🧩 AI Workflow***
+
+```text
+User Input
+      │
+      ▼
+Understand Intent
+      │
+      ▼
+Select Required Tool
+      │
+      ▼
+Execute Tool
+      │
+      ▼
+LLM Reasoning
+      │
+      ▼
+Generate Response
+      │
+      ▼
+Display to User
+```
+
+---
+
+### ***🎯 Use Cases***
+
+✔ AI Assistant
+
+✔ Research Assistant
+
+✔ Web Search Assistant
+
+✔ Document Summarizer
+
+✔ Productivity Workspace
+
+✔ Personal Knowledge Assistant
+
+✔ Learning Companion
+
+---
+
 ### ***🔮 Future Enhancements***
-- Voice Chat
+
+- Voice Assistant
 - Image Understanding
 - RAG Knowledge Base
 - Multi-Agent Collaboration
-- Authentication
-- Chat Export
 - Cloud Memory Sync
-- Plugin Support
+- Mobile Responsive UI
 
 ---
 
 ### 👨‍💻 Developer
 
-**Ankit Gupta 👨‍💻**
+<div align="center">
 
-AI/ML Engineer | GenAI | Agentic AI | LangGraph
+## ANKIT GUPTA 👦
+
+### AI Engineer • AI Backend Developer • GenAI & Agentic AI Developer
+
+Building intelligent AI systems using
+
+**LangGraph • LangChain • Streamlit • LLMs • Machine Learning • Agentic AI**
+
+</div>
 
 ---
 
 ### ⭐ Support
 
-- If you found this project helpful, consider giving it a **⭐ Star** on GitHub.
+- If this project helped you,
 
-- It helps others discover the project and motivates further development.
+- please consider giving it a ⭐ on GitHub.
+
+- It motivates me to continue building high-quality open-source AI projects.
 
 ---
 
 <div align="center">
 
-### Built with ❤️ by Ankit Gupta
+## ***Ominix AI ✨***
 
-**Ominix AI • Agentic AI Workspace**
+### Think Smarter. Search Faster. Remember Better.
+
+### Powered by Agentic AI
+
+Made with ❤️ by **Ankit Gupta**
 
 </div>
