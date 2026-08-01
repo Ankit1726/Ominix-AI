@@ -196,19 +196,17 @@ Display to User
 
 <div align="center">
 
-## ANKIT GUPTA 👦
+## ***ANKIT GUPTA 👦***
 
-### AI Engineer • AI Backend Developer • GenAI & Agentic AI Developer
+***AI Engineer • AI Backend Developer • GenAI & Agentic AI Developer***
 
-Building intelligent AI systems using
-
-**LangGraph • LangChain • Streamlit • LLMs • Machine Learning • Agentic AI**
+***Building intelligent AI systems using***
 
 </div>
 
 ---
 
-### ⭐ Support
+### ***⭐ Support***
 
 - If this project helped you,
 
@@ -220,12 +218,10 @@ Building intelligent AI systems using
 
 <div align="center">
 
-## ***Ominix AI ✨***
+### ***Ominix AI ✨***
 
-### Think Smarter. Search Faster. Remember Better.
+***Think Smarter. Search Faster. Remember Better. Powered by Agentic AI***
 
-### Powered by Agentic AI
-
-Made with ❤️ by **Ankit Gupta**
+***Made with ❤️ by **Ankit Gupta*****
 
 </div>
