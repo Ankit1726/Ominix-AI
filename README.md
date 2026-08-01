@@ -17,10 +17,11 @@
 <p align="center">
   <img src="./preview/ui.png" width="100%">
 </p>
+</div>
+
+--- 
 
 > 🌐 **Live Demo:** [Ominix-AI](https://ominix-ai.onrender.com)
-
-</div>
 
 ---
 
