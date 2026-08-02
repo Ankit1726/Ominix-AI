@@ -70,18 +70,18 @@
 - Multiple LLM support
 - Fast inference using Groq
 
-### 🌐 Real-Time Web Search
+### Real-Time Web & Flight Search ✈️
 - Latest news
+- Current Flight Updates
 - Current events
 - Source-based responses
 - Internet search integration
 
-### 📄 Document Intelligence
-- Upload PDF
-- Upload DOCX
-- Upload TXT
-- AI-powered summarization
-- Ask questions from uploaded files
+### Weather & Stock Market Updates 
+- current stock analysis
+- Current Weather Report
+- Source-based responses
+- Internet search integration
 
 ### 🧠 Persistent Memory
 - Store important information
@@ -89,7 +89,6 @@
 - Personalized AI conversations
 
 ### ***🛠 Built-in AI Tools***
-
 - Calculator
 - Web Search
 - Memory Tool
