@@ -10,7 +10,6 @@ from agent.tools import tools
 from agent.prompt import SYSTEM_PROMPT as prompt
 
 from dotenv import load_dotenv
-
 load_dotenv()
 
 Path("data").mkdir(exist_ok=True)
