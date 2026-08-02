@@ -4,15 +4,19 @@ from agent.schema import (
     ChatMessage,
     LongTermMemory,
     SessionLocal,
+    DATABASE_URL
 )
 from datetime import datetime
 import os
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Local Database
 init_db()
+
+
 def create_conversation(thread_id: str, first_message: str | None = None):
     db = SessionLocal()
     try:
@@ -134,14 +138,12 @@ def search_memory(thread_id: str, query: str):
     finally:
         db.close()
 
-# Cloud Databse
-def cloud_db():
-    db_url = os.getenv("DATABASE_URL")
 
-    if not db_url:
-        raise ValueError("Database Error ⚠️")
-
-    if "sslmode" not in db_url:
-        seperator = "&" if "?" in db_url else "?"
-        db_url = f"{db_url}{seperator}sslmode=require"
-    return db_url
+def cloud_db() -> str:
+    """
+        Kept for backward compatibility with any code that still imports/calls
+        cloud_db() directly. The actual cloud-vs-local decision now happens
+        automatically inside agent/schema.py based on whether DATABASE_URL is
+        set, so this just returns the resolved URL that's already in use.
+    """
+    return DATABASE_URL

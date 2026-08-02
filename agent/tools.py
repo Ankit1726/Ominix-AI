@@ -168,16 +168,15 @@ def get_current_weather(location: str) -> str:
         visibility = f"{visibility / 1000:.1f} km" if visibility is not None else "N/A"
 
         return f"""
-🌍 Location: {display_location}
-
-🌤 Condition : {weather_info.get("description", "N/A").title()}
-🌡 Temperature : {main.get("temp", "N/A")}°C
-🥵 Feels Like : {main.get("feels_like", "N/A")}°C
-💧 Humidity : {main.get("humidity", "N/A")}%
-🌬 Wind Speed : {wind.get("speed", "N/A")} m/s
-📈 Pressure : {main.get("pressure", "N/A")} hPa
-👀 Visibility : {visibility}
-""".strip()
+                🌍 Location: {display_location}
+                🌤 Condition : {weather_info.get("description", "N/A").title()}
+                🌡 Temperature : {main.get("temp", "N/A")}°C
+                🥵 Feels Like : {main.get("feels_like", "N/A")}°C
+                💧 Humidity : {main.get("humidity", "N/A")}%
+                🌬 Wind Speed : {wind.get("speed", "N/A")} m/s
+                📈 Pressure : {main.get("pressure", "N/A")} hPa
+                👀 Visibility : {visibility}
+            """.strip()
 
     except requests.Timeout:
         return "Weather service timed out."

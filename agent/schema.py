@@ -1,17 +1,29 @@
+import os
 from datetime import datetime
 from pathlib import Path
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
 
 Path("data").mkdir(exist_ok=True)
-DB_URL = "sqlite:///data/ominix_memory.db"
-
-engine = create_engine(DB_URL, connect_args={"check_same_thread": False})
 
 
+def get_database_url():
+    db_url = os.getenv("DATABASE_URL")
+
+    if db_url:
+        if "sslmode" not in db_url:
+            separator = "&" if "?" in db_url else "?"
+            db_url = f"{db_url}{separator}sslmode=require"
+        return db_url
+    return "sqlite:///local.db"
+
+
+DATABASE_URL = get_database_url()
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+
+engine = create_engine(DATABASE_URL, pool_pre_ping=True, connect_args=connect_args)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
-
 
 class Conversation(Base):
     __tablename__ = "conversations"

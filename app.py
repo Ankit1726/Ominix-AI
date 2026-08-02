@@ -1,5 +1,6 @@
-import os, uuid, json, uvicorn
+import uuid, json, uvicorn
 from pathlib import Path
+
 from fastapi import FastAPI, Request, UploadFile, File, Form
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -11,7 +12,6 @@ from agent.tools import set_current_thread_id
 from agent.main import get_agent
 from agent.db import (
     init_db,
-    cloud_db,
     save_chat_message,
     get_chat_history,
     create_conversation,
@@ -21,15 +21,11 @@ from agent.db import (
 app = FastAPI()
 templates = Jinja2Templates(directory="frontend/templates")
 
-app.mount("/static", StaticFiles(directory="frontend/static"), name="static") 
+app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 
 Path("uploads").mkdir(exist_ok=True)
 Path("data").mkdir(exist_ok=True)
-
-if os.getenv("DATABASE_URL", "false").lower() == "true":
-    cloud_db()
-else:
-    init_db()
+init_db()
 
 
 # Home Route
