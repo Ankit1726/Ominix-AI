@@ -20,6 +20,6 @@ COPY . .
 
 RUN mkdir -p uploads data
 
-EXPOSE 3000
+EXPOSE 8080
 
-CMD ["uvicorn","app:app","--host","0.0.0.0","--port","3000"]
+CMD ["uvicorn","app:app","--host","0.0.0.0","--port","8080"]
