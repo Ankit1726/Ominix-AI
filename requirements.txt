@@ -13,6 +13,8 @@ langgraph-checkpoint-sqlite==3.1.0
 langchain_groq
 langchain_mistralai
 
+psycopg2-binary 
+
 langchain-chroma==1.1.0
 chromadb==1.5.9
 pypdf==6.12.2
