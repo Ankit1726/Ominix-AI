@@ -10,16 +10,13 @@ from agent.tools import tools
 from agent.prompt import SYSTEM_PROMPT as prompt
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 Path("data").mkdir(exist_ok=True)
 DEFAULT_MODEL = os.getenv("MISTRAL_MODEL", "mistral-medium-latest")
 
-MISTRAL_MODELS = {
-    "ministral-3b-latest",
-    "ministral-8b-latest",
-    "mistral-medium-latest"
-}
+MISTRAL_MODELS = {"ministral-3b-latest", "ministral-8b-latest", "mistral-medium-latest"}
 
 GROQ_MODELS = {
     "llama-3.1-8b-instant",

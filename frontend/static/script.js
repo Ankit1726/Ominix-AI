@@ -37,30 +37,6 @@
       ? crypto.randomUUID()
       : `t-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-  /* -------------------- Theme -------------------- */
-  function initTheme() {
-    const saved = localStorage.getItem("ominix_theme");
-    if (saved === "dark" || saved === "light") {
-      applyTheme(saved);
-      return;
-    }
-    const prefersLight =
-      window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: light)").matches;
-    applyTheme(prefersLight ? "light" : "dark");
-  }
-
-  function applyTheme(theme) {
-    document.documentElement.setAttribute("data-theme", theme);
-    els.themeIcon.textContent = theme === "dark" ? "🌙" : "☀️";
-    localStorage.setItem("ominix_theme", theme);
-  }
-
-  window.toggleTheme = function () {
-    const current = document.documentElement.getAttribute("data-theme");
-    applyTheme(current === "dark" ? "light" : "dark");
-  };
-
   /* -------------------- Sidebar -------------------- */
   window.toggleSidebar = function () {
     els.sidebar.classList.toggle("open");
