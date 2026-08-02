@@ -16,13 +16,9 @@
     welcomeScreen: document.getElementById("welcomeScreen"),
     messagesArea: document.getElementById("messagesArea"),
     scrollBottomBtn: document.getElementById("scrollBottomBtn"),
-    fileInput: document.getElementById("fileInput"),
     messageInput: document.getElementById("messageInput"),
     micBtn: document.getElementById("micBtn"),
     sendBtn: document.getElementById("sendBtn"),
-    uploadProgress: document.getElementById("uploadProgress"),
-    uploadProgressFill: document.getElementById("uploadProgressFill"),
-    uploadProgressText: document.getElementById("uploadProgressText"),
   };
 
   const state = {
@@ -169,59 +165,6 @@
       event.preventDefault();
       sendMessage();
     }
-  };
-
-  /* -------------------- File upload -------------------- */
-  window.openFilePicker = function () {
-    els.fileInput.click();
-  };
-
-  window.uploadFile = function () {
-    const file = els.fileInput.files[0];
-    if (!file) return;
-
-    if (!state.threadId) state.threadId = uid();
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("thread_id", state.threadId);
-
-    const xhr = new XMLHttpRequest();
-    els.uploadProgress.style.display = "flex";
-    els.uploadProgressFill.style.width = "0%";
-    els.uploadProgressText.textContent = `Uploading ${file.name}...`;
-
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) {
-        const pct = Math.round((e.loaded / e.total) * 100);
-        els.uploadProgressFill.style.width = pct + "%";
-      }
-    };
-
-    xhr.onload = () => {
-      els.uploadProgress.style.display = "none";
-      els.fileInput.value = "";
-      try {
-        const data = JSON.parse(xhr.responseText);
-        if (data.success) {
-          showToast(data.message || "File uploaded.");
-          loadConversations();
-        } else {
-          showToast(data.message || "Upload failed.", true);
-        }
-      } catch {
-        showToast("Upload failed.", true);
-      }
-    };
-
-    xhr.onerror = () => {
-      els.uploadProgress.style.display = "none";
-      els.fileInput.value = "";
-      showToast("Upload failed. Check your connection.", true);
-    };
-
-    xhr.open("POST", "/upload");
-    xhr.send(formData);
   };
 
   /* -------------------- Dictation -------------------- */

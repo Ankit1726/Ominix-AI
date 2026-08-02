@@ -10,7 +10,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
 
-# Local Database
+# Databse
 init_db()
 
 

@@ -2,9 +2,7 @@ from langchain_core.tools import tool
 from typing import Any
 from langchain_tavily import TavilySearch
 import os, requests, math
-
 from agent.db import save_memory, search_memory
-from agent.rag import retrieve_text
 
 CURRENT_THREAD_ID = "default"
 
@@ -15,16 +13,6 @@ def set_current_thread_id(thread_id: str):
 
 
 web_search = TavilySearch(max_results=5, topic="general", search_depth="advanced")
-
-
-@tool
-def search_uploaded_documents(query: str) -> str:
-    """
-    Search uploaded documents for relevant information.
-    Use this when the user asks about uploaded PDFs, DOCX, TXT, notes, files, or documents.
-    """
-
-    return retrieve_text(query=query, thread_id=CURRENT_THREAD_ID)
 
 
 @tool
@@ -204,7 +192,6 @@ def get_current_weather(location: str) -> str:
 
 tools = [
     calculator,
-    search_uploaded_documents,
     remember_this,
     recall_memory,
     web_search,

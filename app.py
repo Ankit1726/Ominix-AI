@@ -1,13 +1,12 @@
-import uuid, json, uvicorn
+import json, uvicorn
 from pathlib import Path
 
-from fastapi import FastAPI, Request, UploadFile, File, Form
+from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from langchain_core.messages import HumanMessage, AIMessage, AIMessageChunk, ToolMessage
 
-from agent.rag import add_document
 from agent.tools import set_current_thread_id
 from agent.main import get_agent
 from agent.db import (
@@ -23,7 +22,6 @@ templates = Jinja2Templates(directory="frontend/templates")
 
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 
-Path("uploads").mkdir(exist_ok=True)
 Path("data").mkdir(exist_ok=True)
 init_db()
 
@@ -60,53 +58,13 @@ async def history(thread_id: str):
     }
 
 
-# Upload Route
-@app.post("/upload")
-async def upload_document(file: UploadFile = File(...), thread_id: str = Form(...)):
-    try:
-        allowed_extensions = [".pdf", ".docx", ".txt", ".md", ".py", ".csv"]
-
-        filename = file.filename or "uploaded_file"
-        suffix = Path(filename).suffix.lower()
-
-        if suffix not in allowed_extensions:
-            return JSONResponse(
-                {
-                    "success": False,
-                    "message": "Unsupported file type. Upload PDF, DOCX, TXT, MD, PY, or CSV.",
-                },
-                status_code=400,
-            )
-
-        file_id = str(uuid.uuid4())
-        safe_filename = filename.replace(" ", "_")
-        file_path = f"uploads/{file_id}_{safe_filename}"
-
-        with open(file_path, "wb") as f:
-            f.write(await file.read())
-
-        create_conversation(thread_id, "Uploaded document")
-
-        result = add_document(file_path=file_path, thread_id=thread_id)
-
-        return JSONResponse(
-            {
-                "success": True,
-                "message": f"Uploaded {result['filename']} and created {result['chunks']} chunks.",
-            }
-        )
-
-    except Exception as e:
-        return JSONResponse({"success": False, "message": str(e)}, status_code=500)
-
-
 def sse_data(payload: dict) -> str:
     return f"data:{json.dumps(payload,ensure_ascii=False)}\n\n"
 
 
 def stream_chunk(chunk, metadata) -> bool:
     """
-    This prevents raw tool/search/RAG JSON from appearing in the frontend.
+    This prevents raw tool/search JSON from appearing in the frontend.
 
     We only stream normal AI text chunks.
     We do NOT stream:
