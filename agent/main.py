@@ -20,9 +20,7 @@ MISTRAL_MODELS = {"ministral-3b-latest", "ministral-8b-latest", "mistral-medium-
 
 GROQ_MODELS = {
     "llama-3.1-8b-instant",
-    "qwen/qwen3-32b",
-    "llama-3.3-70b-versatile",
-    "deepseek-r1-distill-llama-70b",
+    "qwen/qwen3-32b"
 }
 
 ALLOWED_MODELS = GROQ_MODELS | MISTRAL_MODELS
