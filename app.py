@@ -1,4 +1,5 @@
-import json, uvicorn
+import json
+import uvicorn
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -19,7 +20,6 @@ from agent.db import (
 
 app = FastAPI()
 templates = Jinja2Templates(directory="frontend/templates")
-
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 
 Path("data").mkdir(exist_ok=True)
@@ -59,7 +59,7 @@ async def history(thread_id: str):
 
 
 def sse_data(payload: dict) -> str:
-    return f"data:{json.dumps(payload,ensure_ascii=False)}\n\n"
+    return f"data:{json.dumps(payload, ensure_ascii=False)}\n\n"
 
 
 def stream_chunk(chunk, metadata) -> bool:
@@ -138,7 +138,7 @@ async def chat_stream(request: Request):
 
     user_message = data.get("message", "")
     thread_id = data.get("thread_id", "default")
-    selected_model = data.get("model", "gemini-2.5-flash")
+    selected_model = data.get("model", "mistral-medium-latest")
 
     if not user_message.strip():
         return JSONResponse({"error": "Message is required."}, status_code=400)
