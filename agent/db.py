@@ -3,8 +3,7 @@ from agent.schema import (
     Conversation,
     ChatMessage,
     LongTermMemory,
-    SessionLocal,
-    DATABASE_URL
+    SessionLocal
 )
 from datetime import datetime
 from dotenv import load_dotenv
