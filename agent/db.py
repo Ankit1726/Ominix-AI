@@ -134,13 +134,3 @@ def search_memory(thread_id: str, query: str):
 
     finally:
         db.close()
-
-
-def cloud_db() -> str:
-    """
-        Kept for backward compatibility with any code that still imports/calls
-        cloud_db() directly. The actual cloud-vs-local decision now happens
-        automatically inside agent/schema.py based on whether DATABASE_URL is
-        set, so this just returns the resolved URL that's already in use.
-    """
-    return DATABASE_URL
