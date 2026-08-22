@@ -1,7 +1,8 @@
-# Environments
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+__pycache__/
+*.pyc
+.env
+data/
+.git
+.gitignore
+*.sqlite
+*.db
