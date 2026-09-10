@@ -7,7 +7,7 @@
 ***Chat • Web Search • Document Intelligence • Persistent Memory • AI Tools***
 
 <p align="center">
-<img src="https://readme-typing-svg.herokuapp.com?font=Poppins&weight=600&size=24&duration=3500&pause=1000&color=4DA6FF&center=true&vCenter=true&width=900&lines=Intelligent+Agentic+AI+Assistant;Chat+%7C+Web+Search+%7C+Memory;Document+Understanding+with+AI;Built+with+LangGraph+%2B+Groq+and+Mistral+AI%2B+Dark+Theme+UI;Built+by+Ankit+Gupta"/>
+<img src="https://readme-typing-svg.herokuapp.com?font=Poppins&weight=600&size=24&duration=3500&pause=1000&color=4DA6FF&center=true&vCenter=true&width=900&lines=Intelligent+Agentic+AI+Assistant;Chat+%7C+Web+Search+%7C+Memory;Document+Understanding+with+AI;Built+with+LangGraph+%2B+Groq+%2B+MistralAI%2B+Dark+Theme+UI;Built+by+Ankit+Gupta"/>
 </p>
 
 <p align="center">
