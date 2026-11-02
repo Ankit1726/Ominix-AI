@@ -11,8 +11,8 @@ services:
       mountPath: /app/data
       sizeGB: 1
     envVars:
-      - key: DATABASE_URL
-        value: sqlite:////app/data/ominix.db
+      - key: SQLITE_DATABASE_PATH
+        value: /app/data/ominix.db
       - key: CHECKPOINT_DB_PATH
         value: /app/data/langgraph_checkpoints.sqlite
       - key: DEFAULT_MODEL

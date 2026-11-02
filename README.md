@@ -56,11 +56,11 @@
 
 ### ***Render Deployment***
 
-The included `render.yaml` stores SQLite data on Render's persistent disk. If you
-configure PostgreSQL instead, set `DATABASE_URL` to the database's **internal**
-connection URL in Render; a stale or external URL can prevent the service from
-connecting. Database initialization retries transient connection failures during
-startup, and `/healthz` reports unhealthy while the database is unavailable.
+The included `render.yaml` stores SQLite data on Render's persistent disk at
+`/app/data/ominix.db`. `SQLITE_DATABASE_PATH` takes precedence over
+`DATABASE_URL`, so a leftover PostgreSQL URL in Render's dashboard will not
+prevent the app from starting with SQLite. The persistent disk must be mounted
+at `/app/data` to retain the database across deploys.
 
 ---
 

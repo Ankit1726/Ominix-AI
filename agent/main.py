@@ -3,7 +3,7 @@ import re
 from groq import RateLimitError
 from langchain_groq import ChatGroq
 from langchain_mistralai import ChatMistralAI
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import SystemMessage, trim_messages
 from langgraph.graph import StateGraph, START, MessagesState
 from langgraph.prebuilt import ToolNode, tools_condition
 from agent.tools import create_tools
@@ -14,26 +14,59 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DEFAULT_MODEL = (
-    os.getenv("DEFAULT_MODEL")
-    or os.getenv("MISTRAL_MODEL")
-    or "mistral-medium-latest"
+    os.getenv("DEFAULT_MODEL") or os.getenv("MISTRAL_MODEL") or "mistral-medium-latest"
 )
 
 MISTRAL_MODELS = {
     "ministral-3b-latest",
     "ministral-8b-latest",
+    "mistral-small-latest",
     "mistral-medium-latest",
+    "mistral-large-latest",
 }
+MISTRAL_MODELS |= {
+    name.strip()
+    for name in os.getenv("MISTRAL_EXTRA_MODELS", "").split(",")
+    if name.strip()
+}
+if os.getenv("MISTRAL_MODEL"):
+    MISTRAL_MODELS.add(os.environ["MISTRAL_MODEL"].strip())
+
+
+def _int_env(name: str, default: int) -> int:
+    try:
+        return max(1, int(os.getenv(name, default)))
+    except (TypeError, ValueError):
+        return default
+
+MAX_CONTEXT_MESSAGES = _int_env("MAX_CONTEXT_MESSAGES", 40)
+LLM_TIMEOUT_SECONDS = _int_env("LLM_TIMEOUT_SECONDS", 60)
+LLM_MAX_RETRIES = _int_env("LLM_MAX_RETRIES", 2)
 
 
 def normalize_model_name(model_name: str | None) -> str:
     if not model_name:
         return DEFAULT_MODEL
     model_name = model_name.strip()
+    if not model_name:
+        return DEFAULT_MODEL
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}", model_name):
-        raise ValueError("Model ID must contain only letters, numbers, '.', '_', ':', '/', or '-'.")
+        raise ValueError(
+            "Model ID must contain only letters, numbers, '.', '_', ':', '/', or '-'."
+        )
 
     return model_name
+
+
+def _build_groq(model: str, api_key: str) -> ChatGroq:
+    return ChatGroq(
+        model=model,
+        api_key=api_key,
+        temperature=0.3,
+        streaming=True,
+        timeout=LLM_TIMEOUT_SECONDS,
+        max_retries=LLM_MAX_RETRIES,
+    )
 
 
 def build_agent(
@@ -58,6 +91,8 @@ def build_agent(
             api_key=api_key,
             temperature=0.3,
             streaming=True,
+            timeout=LLM_TIMEOUT_SECONDS,
+            max_retries=LLM_MAX_RETRIES,
         )
     else:
         shared_api_key = os.getenv("GROQ_API_KEY")
@@ -66,19 +101,9 @@ def build_agent(
             raise ValueError(
                 "A Groq API key is required. Add your key in Settings or configure GROQ_API_KEY."
             )
-        llm = ChatGroq(
-            model=selected_model,
-            api_key=api_key,
-            temperature=0.3,
-            streaming=True,
-        )
+        llm = _build_groq(selected_model, api_key)
         if shared_api_key and groq_api_key and groq_api_key != shared_api_key:
-            fallback_llm = ChatGroq(
-                model=selected_model,
-                api_key=groq_api_key,
-                temperature=0.3,
-                streaming=True,
-            )
+            fallback_llm = _build_groq(selected_model, groq_api_key)
 
     tools = create_tools(
         thread_id=thread_id,
@@ -92,7 +117,24 @@ def build_agent(
         )
 
     def chatbot_node(state: MessagesState):
-        messages = [SystemMessage(content=prompt)] + state["messages"]
+        history = state["messages"]
+        try:
+            # start_on="human" guarantees we never begin with an orphaned tool message
+            trimmed = trim_messages(
+                history,
+                strategy="last",
+                token_counter=len,
+                max_tokens=MAX_CONTEXT_MESSAGES,
+                start_on="human",
+                include_system=False,
+                allow_partial=False,
+            )
+        except Exception:
+            trimmed = history
+        if not trimmed:
+            trimmed = history
+
+        messages = [SystemMessage(content=prompt)] + list(trimmed)
         response = llm_with_tools.invoke(messages)
         return {"messages": [response]}
 

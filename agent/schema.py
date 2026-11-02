@@ -26,26 +26,49 @@ DATA_DIR.mkdir(exist_ok=True)
 
 
 def get_database_url():
+    sqlite_path = os.getenv("SQLITE_DATABASE_PATH")
+    if sqlite_path:
+        database_path = Path(sqlite_path).expanduser()
+        database_path.parent.mkdir(parents=True, exist_ok=True)
+        return f"sqlite:///{database_path.as_posix()}"
+
     db_url = os.getenv("DATABASE_URL")
 
     if db_url:
+        db_url = db_url.strip()
         if db_url.startswith("postgres://"):
             db_url = "postgresql://" + db_url[len("postgres://") :]
-        if db_url.startswith(("postgresql://", "postgresql+")) and "sslmode" not in db_url:
+        if (
+            db_url.startswith(("postgresql://", "postgresql+"))
+            and "sslmode" not in db_url
+        ):
             separator = "&" if "?" in db_url else "?"
             db_url = f"{db_url}{separator}sslmode=require"
         return db_url
     return f"sqlite:///{(DATA_DIR / 'ominix.db').as_posix()}"
 
 
-DATABASE_URL = get_database_url()
-connect_args = (
-    {"check_same_thread": False, "timeout": 30}
-    if DATABASE_URL.startswith("sqlite")
-    else {}
-)
+def get_connect_args(url: str) -> dict:
+    if url.startswith("sqlite"):
+        return {"check_same_thread": False, "timeout": 30}
+    # Postgres: fail fast instead of hanging, and keep idle connections alive
+    return {
+        "connect_timeout": 10,
+        "keepalives": 1,
+        "keepalives_idle": 30,
+        "keepalives_interval": 10,
+        "keepalives_count": 5,
+    }
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True, connect_args=connect_args)
+
+DATABASE_URL = get_database_url()
+
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    pool_recycle=300,
+    connect_args=get_connect_args(DATABASE_URL),
+)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
 
@@ -94,8 +117,8 @@ class DocumentChunk(Base):
     content = Column(Text)
 
 
-def init_db():
-    max_attempts = 5
+def init_db(max_attempts: int = 5):
+    """Create tables / run the tiny migration. Retries on connection errors."""
     for attempt in range(1, max_attempts + 1):
         try:
             Base.metadata.create_all(bind=engine)
@@ -105,7 +128,9 @@ def init_db():
             }:
                 with engine.begin() as connection:
                     connection.execute(
-                        text("ALTER TABLE conversations ADD COLUMN owner_id VARCHAR(64)")
+                        text(
+                            "ALTER TABLE conversations ADD COLUMN owner_id VARCHAR(64)"
+                        )
                     )
             return
         except OperationalError:
