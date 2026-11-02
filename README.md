@@ -1,228 +1,221 @@
 <div align="center">
 
-# ***Ominix AI ✨***
+# ✨ Ominix
 
-#### ***🤖 Intelligent Agentic AI Assistant powered by LangGraph***
+### Your thinking space — an agentic AI workspace for writing, research and discovery
 
-***Chat • Web Search • Document Intelligence • Persistent Memory • AI Tools***
+**Chat • Live Web Research • Document Intelligence • Personal Memory • Bring-Your-Own Keys**
 
 <p align="center">
-<img src="https://readme-typing-svg.herokuapp.com?font=Poppins&weight=600&size=24&duration=3500&pause=1000&color=4DA6FF&center=true&vCenter=true&width=900&lines=Intelligent+Agentic+AI+Assistant;Chat+%7C+Web+Search+%7C+Memory;Document+Understanding+with+AI;Built+with+LangGraph+%2B+Groq+%2B+MistralAI%2B+Dark+Theme+UI;Built+by+Ankit+Gupta"/>
+  <img src="https://readme-typing-svg.herokuapp.com?font=Poppins&weight=600&size=22&duration=3500&pause=1000&color=4DA6FF&center=true&vCenter=true&width=900&lines=Good+ideas+start+with+a+little+curiosity;Chat+%7C+Web+Research+%7C+Documents+%7C+Memory;Built+with+LangGraph+%2B+Groq+%2B+Tavily;Made+with+%E2%99%A5+by+Ankit+Gupta"/>
 </p>
 
 <p align="center">
-
-<img src="https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python"/>
-<img src="https://img.shields.io/badge/LangGraph-Agentic_AI-orange?style=for-the-badge"/>
-<img src="https://img.shields.io/badge/LangChain-Framework-blueviolet?style=for-the-badge"/>
-<img src="https://img.shields.io/badge/Mistral-LLM-purple?style=for-the-badge"/>
-<img src="https://img.shields.io/badge/Open_Source-❤-red?style=for-the-badge"/>
-
+  <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
+  <img src="https://img.shields.io/badge/LangGraph-Agentic_AI-orange?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/LangChain-Framework-blueviolet?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Groq-Fast_Inference-f55036?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Open_Source-%E2%9D%A4-red?style=for-the-badge"/>
 </p>
 
 <p align="center">
-
-<a href="https://ominix-ai.onrender.com/" target="_blank">
-<img src="https://img.shields.io/badge/🚀%20Live%20Demo-Visit%20Now-success?style=for-the-badge">
-</a>
-
+  <a href="https://ominix-ai.onrender.com/" target="_blank">
+    <img src="https://img.shields.io/badge/🚀%20Live%20Demo-Open%20Ominix-success?style=for-the-badge"/>
+  </a>
 </p>
 
 </div>
 
 ---
 
-### ***🌟 About Ominix AI***
+## 🌟 About
 
-- *****Ominix AI** is a modern **Agentic AI Assistant** built using **LangGraph**, **LangChain**, **Groq LLMs**, and **Streamlit**.***
+**Ominix** is a calm, dark-themed AI workspace built on an **agentic architecture**. Instead of juggling separate apps for chatting, searching the web, reading documents and keeping notes, Ominix brings it all into one place — and an agent decides which tool to use for each request.
 
-- ***Instead of using multiple AI applications for chatting, searching, summarizing documents, remembering information, and using utilities, Ominix AI combines everything into one intelligent workspace.***
+> *"A quiet place to ask the big question, untangle the small one, or find something you didn't know you were looking for."*
 
-- The AI intelligently performs tasks such as:
-   - Natural AI Conversations
-   - Real-Time Web Search
-   - Document Summarization
-   - Persistent Long-Term Memory
-   - Built-in AI Tools
-   - Multi-LLM Support
+> 🌐 **Live app:** [Ominix-AI](https://ominix-ai.onrender.com)
+
 
 ---
 
-### ***Live Demo***
+## 📸 Preview
 
-> 🌐 ***Web Application: [Ominix-AI](https://ominix-ai.onrender.com)*** 
-
----
-
-
-
-### ***📸 Project Preview***
 <p align="center">
-<img src="./preview/live.png" width="100%">
+  <img src="./preview/live.png" width="100%" alt="Ominix preview"/>
 </p>
 
 ---
 
-###  ***Features ✨***
+## ✨ Features
 
-### 🤖 Intelligent AI Chat
-- Multi-turn conversations
-- Streaming AI responses
-- Context-aware interactions
-- Multiple LLM support
-- Fast inference using Groq
+### 💬 Intelligent Chat
+- Multi-turn, context-aware conversations
+- Streaming responses
+- Multiple models to choose from (see [Supported Models](#-supported-models))
+- Ultra-fast inference powered by Groq
+- Quick actions with the `⌘ K` shortcut and `↵` to send
 
-### Real-Time Web & Flight Search ✈️
-- Latest news
-- Current Flight Updates
-- Current events
-- Source-based responses
-- Internet search integration
+### 🌐 Go a Little Deeper — Web Research
+- Live web search with real, source-backed answers
+- Latest news and current events
+- Weather, stock and flight updates
+- Powered by Tavily search
 
-### Weather & Stock Market Updates 
-- current stock analysis
-- Current Weather Report
-- Source-based responses
-- Internet search integration
+### 📄 Make Sense of a Document
+- Upload your files and get clear summaries
+- Pull out the useful details, skip the noise
+- Ask follow-up questions about your documents
 
-### 🧠 Persistent Memory
-- Store important information
-- Long-term user memory
-- Personalized AI conversations
+### 🧠 Make It Yours — Personal Memory
+- Save things worth remembering
+- Long-term context across conversations
+- More personal, more relevant answers over time
 
-### ***🛠 Built-in AI Tools***
-- Calculator
-- Web Search
-- Memory Tool
-- Document Processing
+### 💡 Think It Through
+- Brainstorm ideas
+- Turn a knotty problem into a clear next step
+
+### 🔑 Bring Your Own Keys
+- Add your personal **Groq** and **Tavily** API keys from the Settings panel
+- **Automatic fallback:** the shared Groq key is used first; if it hits a rate limit, Ominix seamlessly retries with your personal key
+- Optional custom Groq model ID — use any model available to your account
+- Keys are kept in your browser tab's session storage and are **never saved on the server**
+
+### 🛠 Built-in Tools
+| Tool | Purpose |
+|------|---------|
+| 🔍 Web Search | Real-time research with sources |
+| 📄 Document Processing | Summaries and key-detail extraction |
+| 🧠 Memory | Save and recall personal context |
+| 🧮 Calculator | Accurate math on demand |
 
 ---
 
-### ***🧠 Agent Workflow***
+## 🤖 Supported Models
+
+| Model | Best for |
+|-------|----------|
+| **GPT-OSS 120B** | Deep reasoning and complex tasks |
+| **GPT-OSS 20B** | Balanced speed and quality |
+| **Llama 3.3 70B** | General-purpose chat and writing |
+| **Llama 3.1 8B** | Quick, lightweight responses |
+| **Qwen 3 32B** | Multilingual and analytical work |
+
+---
+
+## 🧠 How the Agent Works
 
 ```text
-                   User Query
-                       │
-                       ▼
-              LangGraph Agent
-                       │
-        ┌──────────────┼──────────────┐
-        ▼              ▼              ▼
-   Web Search      Document AI      Memory
-        │              │              │
-        └──────────────┼──────────────┘
-                       ▼
-               Tool Execution
-                       │
-                       ▼
-                LLM Reasoning
-                       │
-                       ▼
-               Final AI Response
-```
----
-
-### ***🛠 Tech Stack***
--  ***Framework & AI: LangGraph | LangChain***
--  ***LLM: GroqLLM | MistralAI | Gemini***
--  ***Backend: Python 3.11***
--  ***Frontend: HTML | CSS | JavaScript***
--  ***Deployment: Render & Docker***
---- 
-
-### ***AI Services***
-- Tavily Search
-- Persistent Memory
-- Calculator Tool
-- Document Processing
-
----
-
-### ***🧩 AI Workflow***
-
-```text
-User Input
-      │
-      ▼
-Understand Intent
-      │
-      ▼
-Select Required Tool
-      │
-      ▼
-Execute Tool
-      │
-      ▼
-LLM Reasoning
-      │
-      ▼
-Generate Response
-      │
-      ▼
-Display to User
+                      User Query
+                          │
+                          ▼
+                 Understand Intent
+                          │
+                          ▼
+                  LangGraph Agent
+                          │
+          ┌───────────────┼───────────────┐
+          ▼               ▼               ▼
+     Web Search      Document AI        Memory
+      (Tavily)           │                 │
+          └───────────────┼───────────────┘
+                          ▼
+                    Tool Execution
+                          │
+                          ▼
+                     LLM Reasoning
+                          │
+                          ▼
+                 Streamed Final Response
 ```
 
 ---
 
-### ***🎯 Use Cases***
+## 🛠 Tech Stack
 
-✔ AI Assistant
-
-✔ Research Assistant
-
-✔ Web Search Assistant
-
-✔ Document Summarizer
-
-✔ Productivity Workspace
-
-✔ Personal Knowledge Assistant
-
-✔ Learning Companion
+| Layer | Technology |
+|-------|-----------|
+| **Agent Framework** | LangGraph · LangChain |
+| **LLM Providers** | Groq (GPT-OSS, Llama, Qwen) |
+| **Search** | Tavily |
+| **Backend** | Python 3.11 |
+| **Frontend** | HTML · CSS · JavaScript |
+| **Deployment** | Render · Docker |
 
 ---
 
-### ***🔮 Future Enhancements***
+## 🎯 Use Cases
 
-- Voice Assistant
-- Image Understanding
-- RAG Knowledge Base
-- Multi-Agent Collaboration
-- Cloud Memory Sync
-- Mobile Responsive UI
+- 🤖 Everyday AI assistant
+- 🔎 Research assistant with real sources
+- 📄 Document summarizer
+- 🗂 Personal knowledge assistant
+- ⚡ Productivity workspace
+- 📚 Learning companion
 
 ---
 
-### 👨‍💻 Developer
+## 🔒 Privacy
+
+- Your workspace is private to your device
+- Personal API keys live only in your browser tab's session storage
+- Keys are sent over a secure connection and never stored on the server
+
+> ⚠️ Ominix can make mistakes. Double-check anything that really matters.
+
+---
+
+## 🔮 Roadmap
+
+- [ ] 🎙 Voice assistant
+- [ ] 🖼 Image understanding
+- [ ] 📚 RAG knowledge base
+- [ ] 🤝 Multi-agent collaboration
+- [ ] ☁️ Cloud memory sync
+- [ ] 📱 Fully mobile-responsive UI
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues and feature requests are welcome!
+
+1. Fork the project
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m "Add amazing feature"`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+---
+
+## 👨‍💻 Developer
 
 <div align="center">
 
-## ***ANKIT GUPTA 👦***
+### **Ankit Gupta**
 
-***AI Engineer • AI Backend Developer • GenAI & Agentic AI Developer***
+**AI Engineer • AI Backend Developer • GenAI & Agentic AI Developer**
 
-***Building intelligent AI systems using***
+*Building intelligent AI systems with LangGraph, LangChain and modern LLMs.*
 
 </div>
 
 ---
 
-### ***⭐ Support***
+## ⭐ Support
 
-- If this project helped you,
-
-- please consider giving it a ⭐ on GitHub.
-
-- It motivates me to continue building high-quality open-source AI projects.
+If Ominix helped you, please consider giving it a ⭐ on GitHub — it motivates me to keep building high-quality open-source AI projects.
 
 ---
 
 <div align="center">
 
-### ***Ominix AI ✨***
+### ✨ Ominix
 
-***Think Smarter. Search Faster. Remember Better. Powered by Agentic AI***
+**Think smarter. Search faster. Remember better.**
 
-***Made with ❤️ by **Ankit Gupta*****
+*A calmer corner of the internet — made with ❤️ by **Ankit Gupta***
 
 </div>
