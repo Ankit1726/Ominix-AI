@@ -55,6 +55,15 @@
       ? crypto.randomUUID()
       : `t-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
+  /* -------------------- Safe JSON helper -------------------- */
+  async function readJson(response) {
+    try {
+      return await response.json();
+    } catch {
+      return {};
+    }
+  }
+
   /* -------------------- Sidebar -------------------- */
   window.toggleSidebar = function () {
     els.sidebar.classList.toggle("open");
@@ -95,9 +104,20 @@
       const data = await res.json();
       state.conversations = data.conversations || [];
       renderConversations();
+      syncTopbarTitle();
     } catch (err) {
       els.conversationList.innerHTML =
         '<div class="empty-history">Couldn\'t load chat history.</div>';
+    }
+  }
+
+  // Keep the topbar title in sync with the saved conversation title.
+  function syncTopbarTitle() {
+    const current = state.conversations.find(
+      (c) => c.thread_id === state.threadId,
+    );
+    if (current && current.title) {
+      els.topbarTitle.textContent = current.title;
     }
   }
 
@@ -118,9 +138,16 @@
       item.className =
         "conversation-item" + (c.thread_id === state.threadId ? " active" : "");
       item.setAttribute("role", "listitem");
+      item.tabIndex = 0;
       item.textContent = c.title || "Untitled chat";
       item.title = c.title || "Untitled chat";
       item.onclick = () => openConversation(c.thread_id, c.title);
+      item.onkeydown = (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openConversation(c.thread_id, c.title);
+        }
+      };
       els.conversationList.appendChild(item);
     });
   }
@@ -128,7 +155,7 @@
   async function openConversation(threadId, title) {
     state.threadId = threadId;
     localStorage.setItem("ominix_thread", threadId);
-    els.topbarTitle.textContent = title || "Ominix Agentic AI";
+    els.topbarTitle.textContent = title || "New conversation";
     renderConversations();
     closeSidebar();
 
@@ -136,13 +163,17 @@
     setStatus("thinking", "Loading...");
 
     try {
-      const res = await fetch(`/history/${threadId}`);
+      const res = await fetch(`/history/${encodeURIComponent(threadId)}`);
       if (!res.ok) {
         const error = new Error(`Server responded ${res.status}`);
         error.status = res.status;
         throw error;
       }
       const data = await res.json();
+
+      // Ignore stale responses if the user switched conversations meanwhile.
+      if (state.threadId !== threadId) return;
+
       const messages = data.messages || [];
 
       if (!messages.length) {
@@ -154,17 +185,22 @@
         messages.forEach((m) => appendMessage(m.role, m.content));
       }
       await loadDocuments(threadId);
-      scrollToBottom();
+      syncTopbarTitle();
+      scrollToBottomInstant();
       setStatus("ready", "Ready");
     } catch (err) {
-      if (err.status === 404 && state.threadId === threadId) {
+      if (state.threadId !== threadId) return;
+      if (err.status === 404) {
         state.threadId = null;
         localStorage.removeItem("ominix_thread");
         window.newChat();
         return;
       }
       setStatus("error", "Error");
-      showToast("Couldn't load that conversation. Please check your connection and try again.", true);
+      showToast(
+        "Couldn't load that conversation. Please check your connection and try again.",
+        true,
+      );
     }
   }
 
@@ -181,7 +217,16 @@
     loadDocuments(state.threadId);
     closeSidebar();
     setStatus("ready", "Ready");
+    els.messageInput.focus();
   };
+
+  // Cmd/Ctrl + K starts a new conversation (matches the shortcut hint in the UI).
+  document.addEventListener("keydown", (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      window.newChat();
+    }
+  });
 
   /* -------------------- Prompt cards -------------------- */
   window.usePrompt = function (text) {
@@ -201,6 +246,8 @@
   }
 
   window.handleKeyDown = function (event) {
+    // Don't send while an IME (Hindi, Chinese, Japanese...) is composing text.
+    if (event.isComposing || event.keyCode === 229) return;
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       sendMessage();
@@ -224,7 +271,7 @@
     }
 
     recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
+    recognition.lang = navigator.language || "en-US";
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
@@ -254,6 +301,10 @@
   /* -------------------- Model selector -------------------- */
   window.onModelChange = function (value) {
     localStorage.setItem("ominix_model", value);
+    // An explicit dropdown choice should win over a previously saved custom ID.
+    if (localStorage.getItem("ominix_custom_model")) {
+      localStorage.removeItem("ominix_custom_model");
+    }
     const label =
       els.modelSelect.selectedOptions[0]?.textContent?.trim() || value;
     showToast(`Switched to ${label}`);
@@ -266,10 +317,12 @@
     els.themeIcon.textContent = selected === "dark" ? "☀" : "☾";
     document.getElementById("themeToggle").title =
       selected === "dark" ? "Switch to light theme" : "Switch to dark theme";
-    document.getElementById("themeToggle").setAttribute(
-      "aria-label",
-      selected === "dark" ? "Switch to light theme" : "Switch to dark theme",
-    );
+    document
+      .getElementById("themeToggle")
+      .setAttribute(
+        "aria-label",
+        selected === "dark" ? "Switch to light theme" : "Switch to dark theme",
+      );
     localStorage.setItem("ominix_theme", selected);
   }
 
@@ -278,7 +331,9 @@
   }
 
   window.toggleTheme = function () {
-    applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+    applyTheme(
+      document.documentElement.dataset.theme === "dark" ? "light" : "dark",
+    );
   };
 
   /* -------------------- API settings -------------------- */
@@ -309,7 +364,7 @@
       customModel &&
       !/^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/.test(customModel)
     ) {
-      showToast("Enter a valid Groq model ID.", true);
+      showToast("Enter a valid model ID.", true);
       return;
     }
 
@@ -320,7 +375,7 @@
       try {
         sessionStorage.setItem("ominix_groq_api_key", groqApiKey);
       } catch {
-        state.credentials.groqApiKey = groqApiKey;
+        /* session storage unavailable: key stays in memory only */
       }
     }
     if (tavilyApiKey) {
@@ -328,10 +383,14 @@
       try {
         sessionStorage.setItem("ominix_tavily_api_key", tavilyApiKey);
       } catch {
-        state.credentials.tavilyApiKey = tavilyApiKey;
+        /* session storage unavailable: key stays in memory only */
       }
     }
-    localStorage.setItem("ominix_custom_model", customModel);
+    if (customModel) {
+      localStorage.setItem("ominix_custom_model", customModel);
+    } else {
+      localStorage.removeItem("ominix_custom_model");
+    }
     els.groqApiKey.value = "";
     els.tavilyApiKey.value = "";
     updateKeyStates();
@@ -345,12 +404,12 @@
       sessionStorage.removeItem("ominix_groq_api_key");
       sessionStorage.removeItem("ominix_tavily_api_key");
     } catch {
-      showToast("Keys cleared for this page.", true);
+      /* ignore */
     }
     els.groqApiKey.value = "";
     els.tavilyApiKey.value = "";
     updateKeyStates();
-    showToast("In-memory API keys cleared.");
+    showToast("API keys cleared.");
   };
 
   async function loadServerConfig() {
@@ -358,29 +417,31 @@
       const response = await fetch("/config");
       if (!response.ok) throw new Error(`Server responded ${response.status}`);
       const config = await response.json();
-      if (
-        config.default_model &&
-        [...els.modelSelect.options].some(
-          (option) => option.value === config.default_model,
-        )
-      ) {
-        els.modelSelect.value = config.default_model;
-      }
-      const groq = config.groq_key_configured ? "Groq default: ready" : "Groq default: not configured";
+      const groq = config.groq_key_configured
+        ? "Groq default: ready"
+        : "Groq default: not configured";
       const tavily = config.tavily_key_configured
         ? "Tavily default: ready"
         : "Tavily default: not configured";
       els.serverKeyStatus.textContent = `${groq} · ${tavily}`;
+      return config;
     } catch {
       els.serverKeyStatus.textContent = "Could not check server key settings.";
+      return {};
     }
+  }
+
+  function hasModelOption(value) {
+    return [...els.modelSelect.options].some((o) => o.value === value);
   }
 
   /* -------------------- Uploaded documents -------------------- */
   async function loadDocuments(threadId) {
     if (!threadId) return;
     try {
-      const response = await fetch(`/documents/${encodeURIComponent(threadId)}`);
+      const response = await fetch(
+        `/documents/${encodeURIComponent(threadId)}`,
+      );
       if (!response.ok) throw new Error(`Server responded ${response.status}`);
       const data = await response.json();
       if (state.threadId === threadId) {
@@ -415,7 +476,10 @@
 
   window.chooseDocument = function () {
     if (state.isStreaming) {
-      showToast("Wait for the current response to finish before uploading.", true);
+      showToast(
+        "Wait for the current response to finish before uploading.",
+        true,
+      );
       return;
     }
     els.documentInput.click();
@@ -428,20 +492,28 @@
       `/documents/${encodeURIComponent(state.threadId)}`,
       { method: "POST", body },
     );
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || `Upload failed (${response.status})`);
+    const result = await readJson(response);
+    if (!response.ok) {
+      throw new Error(
+        result.error ||
+          (response.status === 413
+            ? "That file is too large."
+            : `Upload failed (${response.status})`),
+      );
+    }
     await loadDocuments(state.threadId);
-    showToast(`Added ${result.document.filename}`);
+    showToast(`Added ${result.document?.filename || file.name}`);
   }
 
   async function removeDocument(documentId) {
     try {
       const response = await fetch(
-        `/documents/${encodeURIComponent(state.threadId)}/${documentId}`,
+        `/documents/${encodeURIComponent(state.threadId)}/${encodeURIComponent(documentId)}`,
         { method: "DELETE" },
       );
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Couldn't remove that file.");
+      const result = await readJson(response);
+      if (!response.ok)
+        throw new Error(result.error || "Couldn't remove that file.");
       await loadDocuments(state.threadId);
     } catch (error) {
       showToast(error.message || "Couldn't remove that file.", true);
@@ -465,6 +537,16 @@
   });
 
   /* -------------------- Rendering messages -------------------- */
+  // Open links in a new tab safely.
+  if (window.DOMPurify) {
+    DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+      if (node.tagName === "A" && node.hasAttribute("href")) {
+        node.setAttribute("target", "_blank");
+        node.setAttribute("rel", "noopener noreferrer");
+      }
+    });
+  }
+
   function renderMarkdown(text) {
     if (window.marked && window.DOMPurify) {
       try {
@@ -572,7 +654,10 @@
       }
       showToast("Message copied.");
     } catch {
-      showToast("Couldn't copy this message. Check your browser permissions.", true);
+      showToast(
+        "Couldn't copy this message. Check your browser permissions.",
+        true,
+      );
     }
   }
 
@@ -613,10 +698,11 @@
         </body>
       </html>`);
     printWindow.document.close();
-    printWindow.requestAnimationFrame(() => {
+    // requestAnimationFrame may not fire in a background window; use a timeout.
+    setTimeout(() => {
       printWindow.focus();
       printWindow.print();
-    });
+    }, 300);
     showToast("Print dialog opened. Choose Save as PDF to download.");
   }
 
@@ -660,12 +746,20 @@
     });
   };
 
-  els.chatContainer.addEventListener("scroll", () => {
-    const distance =
+  function scrollToBottomInstant() {
+    els.chatContainer.scrollTo({ top: els.chatContainer.scrollHeight });
+  }
+
+  function distanceFromBottom() {
+    return (
       els.chatContainer.scrollHeight -
       els.chatContainer.scrollTop -
-      els.chatContainer.clientHeight;
-    els.scrollBottomBtn.classList.toggle("visible", distance > 240);
+      els.chatContainer.clientHeight
+    );
+  }
+
+  els.chatContainer.addEventListener("scroll", () => {
+    els.scrollBottomBtn.classList.toggle("visible", distanceFromBottom() > 240);
   });
 
   /* -------------------- Sending / streaming -------------------- */
@@ -678,7 +772,7 @@
     appendMessage("user", text);
     els.messageInput.value = "";
     autoResizeInternal();
-    els.chatContainer.scrollTo({ top: els.chatContainer.scrollHeight });
+    scrollToBottomInstant();
 
     const assistantContentEl = appendTypingBubble();
     els.sendBtn.disabled = true;
@@ -690,6 +784,52 @@
     let buffer = "";
     let firstToken = true;
     let streamFailed = false;
+    let renderQueued = false;
+
+    // Throttle markdown re-rendering to one per animation frame, and only
+    // auto-scroll if the user is already near the bottom.
+    function renderNow() {
+      renderQueued = false;
+      const stick = distanceFromBottom() < 120;
+      assistantContentEl.innerHTML = renderMarkdown(buffer);
+      highlightCode(assistantContentEl);
+      if (stick) scrollToBottomInstant();
+    }
+
+    function scheduleRender() {
+      if (renderQueued) return;
+      renderQueued = true;
+      requestAnimationFrame(renderNow);
+    }
+
+    function handleFrame(frame) {
+      const line = frame.trim();
+      if (!line.startsWith("data:")) return;
+
+      const jsonStr = line.slice(5).trim();
+      if (!jsonStr) return;
+
+      let payload;
+      try {
+        payload = JSON.parse(jsonStr);
+      } catch {
+        return;
+      }
+
+      if (payload.error) {
+        streamFailed = true;
+        renderQueued = true; // suppress any pending render overwriting the error
+        assistantContentEl.innerHTML = `<span class="msg-error">Something went wrong: ${escapeHtml(payload.error)}</span>`;
+        setStatus("error", "Error");
+      } else if (payload.token && !streamFailed) {
+        if (firstToken) {
+          buffer = "";
+          firstToken = false;
+        }
+        buffer += payload.token;
+        scheduleRender();
+      }
+    }
 
     try {
       const res = await fetch("/chat/stream", {
@@ -705,7 +845,7 @@
       });
 
       if (!res.ok || !res.body) {
-        const errorBody = await res.json().catch(() => ({}));
+        const errorBody = await readJson(res);
         throw new Error(errorBody.error || `Server responded ${res.status}`);
       }
 
@@ -717,49 +857,31 @@
         const { value, done } = await reader.read();
         if (done) break;
 
-        sseBuffer += decoder.decode(value, { stream: true });
+        sseBuffer += decoder
+          .decode(value, { stream: true })
+          .replace(/\r\n/g, "\n");
         const frames = sseBuffer.split("\n\n");
         sseBuffer = frames.pop() || "";
-
-        for (const frame of frames) {
-          const line = frame.trim();
-          if (!line.startsWith("data:")) continue;
-
-          const jsonStr = line.slice(5).trim();
-          if (!jsonStr) continue;
-
-          let payload;
-          try {
-            payload = JSON.parse(jsonStr);
-          } catch {
-            continue;
-          }
-
-          if (payload.error) {
-            streamFailed = true;
-            assistantContentEl.innerHTML = `<span class="msg-error">Something went wrong: ${escapeHtml(payload.error)}</span>`;
-            setStatus("error", "Error");
-          } else if (payload.token) {
-            if (firstToken && !streamFailed) {
-              buffer = "";
-              firstToken = false;
-            }
-            buffer += payload.token;
-            assistantContentEl.innerHTML = renderMarkdown(buffer);
-            highlightCode(assistantContentEl);
-            els.chatContainer.scrollTo({ top: els.chatContainer.scrollHeight });
-          } else if (payload.done) {
-            // finalize handled after loop
-          }
-        }
+        frames.forEach(handleFrame);
       }
 
-      if (firstToken) {
-        // no tokens ever arrived
+      // Process anything left in the buffer when the stream closes.
+      sseBuffer += decoder.decode().replace(/\r\n/g, "\n");
+      if (sseBuffer.trim()) handleFrame(sseBuffer);
+
+      if (!streamFailed && !firstToken) {
+        renderNow(); // final, complete render
+      }
+
+      if (firstToken && !streamFailed) {
         assistantContentEl.innerHTML =
           '<span class="msg-error">No response received. Please try again.</span>';
       } else if (!streamFailed && buffer.trim()) {
-        addMessageActions(assistantContentEl.closest(".msg-body"), assistantContentEl, "assistant");
+        addMessageActions(
+          assistantContentEl.closest(".msg-body"),
+          assistantContentEl,
+          "assistant",
+        );
       }
 
       if (!streamFailed) setStatus("ready", "Ready");
@@ -775,29 +897,37 @@
   window.sendMessage = sendMessage;
 
   /* -------------------- Init -------------------- */
-  document.addEventListener("DOMContentLoaded", () => {
+  async function init() {
     initTheme();
-    loadServerConfig();
+
+    // Wait for server config so it can't overwrite the user's saved model.
+    const config = await loadServerConfig();
 
     const savedModel = localStorage.getItem("ominix_model");
-    if (
-      savedModel &&
-      [...els.modelSelect.options].some((o) => o.value === savedModel)
-    ) {
+    if (savedModel && hasModelOption(savedModel)) {
       els.modelSelect.value = savedModel;
+    } else if (config.default_model && hasModelOption(config.default_model)) {
+      els.modelSelect.value = config.default_model;
     }
-
-    loadConversations();
 
     const savedThread = localStorage.getItem("ominix_thread");
     if (savedThread) {
+      state.threadId = savedThread;
+      loadConversations();
       openConversation(savedThread, null);
     } else {
       state.threadId = uid();
       localStorage.setItem("ominix_thread", state.threadId);
+      loadConversations();
       loadDocuments(state.threadId);
     }
 
     els.messageInput.focus();
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
