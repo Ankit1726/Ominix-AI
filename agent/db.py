@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from agent.schema import (
-    init_db,
     Conversation,
     ChatMessage,
     LongTermMemory,
@@ -9,10 +8,6 @@ from agent.schema import (
     DocumentChunk,
     SessionLocal,
 )
-
-# Make sure local tables exist as soon as this module is imported.
-init_db()
-
 
 def create_conversation(
     thread_id: str,

@@ -1,3 +1,5 @@
+import asyncio
+from contextlib import asynccontextmanager
 import json
 import hashlib
 import logging
@@ -45,7 +47,13 @@ THREAD_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 SESSION_PATTERN = re.compile(r"^[A-Za-z0-9_-]{32,128}$")
 ALLOWED_DOCUMENT_TYPES = {".txt", ".md", ".pdf", ".docx"}
 
-app = FastAPI(title="Ominix AI", version="1.0.0")
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    await asyncio.to_thread(init_db)
+    yield
+
+
+app = FastAPI(title="Ominix AI", version="1.0.0", lifespan=lifespan)
 templates = Jinja2Templates(directory=str(BASE_DIR / "frontend" / "templates"))
 app.mount(
     "/static",
@@ -54,7 +62,6 @@ app.mount(
 )
 
 (BASE_DIR / "data").mkdir(exist_ok=True)
-init_db()
 
 
 @app.middleware("http")

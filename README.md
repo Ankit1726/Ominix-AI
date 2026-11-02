@@ -54,6 +54,16 @@
 
 ---
 
+### ***Render Deployment***
+
+The included `render.yaml` stores SQLite data on Render's persistent disk. If you
+configure PostgreSQL instead, set `DATABASE_URL` to the database's **internal**
+connection URL in Render; a stale or external URL can prevent the service from
+connecting. Database initialization retries transient connection failures during
+startup, and `/healthz` reports unhealthy while the database is unavailable.
+
+---
+
 ### ***📸 Project Preview***
 <p align="center">
 <img src="./preview/ui.png" width="100%">

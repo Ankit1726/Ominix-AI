@@ -1,8 +1,11 @@
 from datetime import datetime
+import logging
 import os
 from pathlib import Path
+import time
 from dotenv import load_dotenv
 from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.exc import OperationalError
 from sqlalchemy import (
     create_engine,
     Column,
@@ -14,6 +17,8 @@ from sqlalchemy import (
     inspect,
     text,
 )
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -90,11 +95,33 @@ class DocumentChunk(Base):
 
 
 def init_db():
-    Base.metadata.create_all(bind=engine)
-    if "owner_id" not in {
-        column["name"] for column in inspect(engine).get_columns("conversations")
-    }:
-        with engine.begin() as connection:
-            connection.execute(
-                text("ALTER TABLE conversations ADD COLUMN owner_id VARCHAR(64)")
+    max_attempts = 5
+    for attempt in range(1, max_attempts + 1):
+        try:
+            Base.metadata.create_all(bind=engine)
+            if "owner_id" not in {
+                column["name"]
+                for column in inspect(engine).get_columns("conversations")
+            }:
+                with engine.begin() as connection:
+                    connection.execute(
+                        text("ALTER TABLE conversations ADD COLUMN owner_id VARCHAR(64)")
+                    )
+            return
+        except OperationalError:
+            if attempt == max_attempts:
+                logger.exception(
+                    "Database initialization failed after %d attempts",
+                    max_attempts,
+                )
+                raise
+
+            delay = 2 ** (attempt - 1)
+            logger.warning(
+                "Database initialization attempt %d/%d failed; retrying in %d seconds",
+                attempt,
+                max_attempts,
+                delay,
             )
+            engine.dispose()
+            time.sleep(delay)
