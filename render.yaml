@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ominix-ai
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    disk:
+      name: ominix-data
+      mountPath: /app/data
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:////app/data/ominix.db
+      - key: CHECKPOINT_DB_PATH
+        value: /app/data/langgraph_checkpoints.sqlite
+      - key: DEFAULT_MODEL
+        value: llama-3.3-70b-versatile
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false

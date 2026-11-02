@@ -1,0 +1,20 @@
+# Environments
+.venv
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Secrets and local state
+.env
+data/
+*.db
+*.sqlite
+
+# Repository and generated files
+.git
+.gitignore
+__pycache__/
+*.py[cod]
+preview/
