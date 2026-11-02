@@ -17,20 +17,20 @@ DEFAULT_MODEL = (
     os.getenv("DEFAULT_MODEL") or os.getenv("MISTRAL_MODEL") or "mistral-medium-latest"
 )
 
-MISTRAL_MODELS = {
-    "ministral-3b-latest",
-    "ministral-8b-latest",
-    "mistral-small-latest",
-    "mistral-medium-latest",
-    "mistral-large-latest",
+GROQ_MODELS = {
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "qwen/qwen3.8-27b",
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
 }
-MISTRAL_MODELS |= {
+GROQ_MODELS |= {
     name.strip()
-    for name in os.getenv("MISTRAL_EXTRA_MODELS", "").split(",")
+    for name in os.getenv("GROQ_EXTRA_MODELS", "").split(",")
     if name.strip()
 }
 if os.getenv("MISTRAL_MODEL"):
-    MISTRAL_MODELS.add(os.environ["MISTRAL_MODEL"].strip())
+    GROQ_MODELS.add(os.environ["GROQ_MODEL"].strip())
 
 
 def _int_env(name: str, default: int) -> int:
@@ -38,6 +38,7 @@ def _int_env(name: str, default: int) -> int:
         return max(1, int(os.getenv(name, default)))
     except (TypeError, ValueError):
         return default
+
 
 MAX_CONTEXT_MESSAGES = _int_env("MAX_CONTEXT_MESSAGES", 40)
 LLM_TIMEOUT_SECONDS = _int_env("LLM_TIMEOUT_SECONDS", 60)
@@ -79,7 +80,7 @@ def build_agent(
     selected_model = normalize_model_name(model_name)
 
     fallback_llm = None
-    if selected_model in MISTRAL_MODELS:
+    if selected_model in GROQ_MODELS:
         api_key = os.getenv("MISTRAL_API_KEY")
         if not api_key:
             raise ValueError(
