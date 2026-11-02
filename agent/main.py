@@ -17,6 +17,7 @@ DEFAULT_MODEL = (
     os.getenv("DEFAULT_MODEL") or os.getenv("MISTRAL_MODEL") or "mistral-medium-latest"
 )
 
+# Models that are always routed to Groq.
 GROQ_MODELS = {
     "openai/gpt-oss-120b",
     "openai/gpt-oss-20b",
@@ -30,8 +31,22 @@ GROQ_MODELS |= {
     for name in os.getenv("GROQ_EXTRA_MODELS", "").split(",")
     if name.strip()
 }
-if os.getenv("MISTRAL_MODEL"):
+# FIX: previously checked MISTRAL_MODEL and then read GROQ_MODEL (KeyError / wrong var).
+if (os.getenv("GROQ_MODEL") or "").strip():
     GROQ_MODELS.add(os.environ["GROQ_MODEL"].strip())
+
+# Name prefixes that identify Mistral-hosted models.
+MISTRAL_PREFIXES = (
+    "mistral",
+    "open-mistral",
+    "open-mixtral",
+    "codestral",
+    "ministral",
+    "pixtral",
+    "magistral",
+    "devstral",
+    "voxtral",
+)
 
 
 def _int_env(name: str, default: int) -> int:
@@ -60,6 +75,14 @@ def normalize_model_name(model_name: str | None) -> str:
     return model_name
 
 
+def is_mistral_model(model_name: str) -> bool:
+    """Explicit Groq models win; otherwise Mistral-looking names go to Mistral;
+    anything else (e.g. a custom ID typed in Settings) goes to Groq."""
+    if model_name in GROQ_MODELS:
+        return False
+    return model_name.lower().startswith(MISTRAL_PREFIXES)
+
+
 def _build_groq(model: str, api_key: str) -> ChatGroq:
     return ChatGroq(
         model=model,
@@ -81,11 +104,12 @@ def build_agent(
     selected_model = normalize_model_name(model_name)
 
     fallback_llm = None
-    if selected_model in GROQ_MODELS:
+    # FIX: condition was inverted (Groq models were sent to Mistral).
+    if is_mistral_model(selected_model):
         api_key = os.getenv("MISTRAL_API_KEY")
         if not api_key:
             raise ValueError(
-                "Mistral is selected, but no Mistral API key is configured. "
+                "A Mistral model is selected, but no Mistral API key is configured. "
                 "Select a Groq model or configure MISTRAL_API_KEY."
             )
         llm = ChatMistralAI(

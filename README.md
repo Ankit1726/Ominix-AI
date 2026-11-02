@@ -54,19 +54,11 @@
 
 ---
 
-### ***Render Deployment***
 
-The included `render.yaml` stores SQLite data on Render's persistent disk at
-`/app/data/ominix.db`. `SQLITE_DATABASE_PATH` takes precedence over
-`DATABASE_URL`, so a leftover PostgreSQL URL in Render's dashboard will not
-prevent the app from starting with SQLite. The persistent disk must be mounted
-at `/app/data` to retain the database across deploys.
-
----
 
 ### ***📸 Project Preview***
 <p align="center">
-<img src="./preview/ui.png" width="100%">
+<img src="./preview/live.png" width="100%">
 </p>
 
 ---
