@@ -41,8 +41,6 @@
 
 ***Web Application 👉 [Ominix AI](https://ominix-ai.onrender.com)***
 
-> ⏳ Hosted on a free tier, so the first load may take a few seconds while the server wakes up.
-
 ---
 
 ### ***📸 Project Preview***
